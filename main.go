@@ -100,7 +100,7 @@ func (p *piano) Stato(x, y int) {
 
 // [[file:main.org::*Stampa][Stampa:1]]
 // Stampa stampa le liste degli automi e degli ostacoli
-func (p *piano) Stampa() {
+func (p *piano) stampa() {
 	// Ottieni l'elenco ordinato dei nomi degli automi per output coerente
 	nomi := make([]string, 0, len(p.automa))
 	for nome := range p.automa {
@@ -125,7 +125,7 @@ func (p *piano) Stampa() {
 
 // [[file:main.org::*Automa][Automa:1]]
 // Automa aggiunge o sposta un automa
-func (p *piano) Automa(x, y int, nome string) {
+func (p *piano) automa(x, y int, nome string) {
 	punto := punto{X: x, Y: y}
 
 	// Controlla se il punto è in un ostacolo
@@ -143,7 +143,7 @@ func (p *piano) Automa(x, y int, nome string) {
 
 // [[file:main.org::*Ostacolo][Ostacolo:1]]
 // Ostacolo aggiunge un ostacolo se possibile
-func (p *piano) Ostacolo(x0, y0, x1, y1 int) {
+func (p *piano) ostacolo(x0, y0, x1, y1 int) {
 	ostacolo := ostacolo{
 		AngoloInferioreSinistro: punto{X: x0, Y: y0}
 		AngoloSuperioreDestro: punto{X: x1, Y: y1}
@@ -163,7 +163,7 @@ func (p *piano) Ostacolo(x0, y0, x1, y1 int) {
 
 // [[file:main.org::*Richiamo][Richiamo:1]]
 // Calcolo della distanza di Manhattan
-func distanza(a, b Punto) int {
+func distanza(a, b punto) int {
 	return abs(b.X-a.X) + abs(b.Y-b.Y)
 }
 
@@ -183,40 +183,27 @@ func isPrefisso(alpha, eta string) bool {
 }
 
 // Richiamo emette un segnale dal punto (x,y)
-func (p *Piano) Richiamo(x, y int, alpha string) {
-	sorgente := Punto{X: x, Y: y}
+func (p *piano) richiamo(x, y int, alpha string) {
+	sorgente := punto{X: x, Y: y}
 
 	// Se la sorgente è in un ostacolo, nessun movimento possibile
 	if p.isPuntoInOstacolo(sorgente) {
 		return
 	}
 
-	// Trova gli automi rispondenti e la distanza minima
-	automiRispondenti := make([]*Automa, 0)
-	minDist := -1
-
 	for _, aut := range p.automa {
-		if isPrefisso(alpha, aut.Nome) {
-			dist := distanza(sorgente, aut.Posizione)
-			if minDist == -1 || dist < minDist {
-				minDist = dist
-				automiRispondenti = automiRispondenti[:0]
-				automiRispondenti = append(automiRispondenti, aut)
-			} else if dist == minDist {
-				automiRispondenti = append(automiRispondenti, aut)
-			}
-		}
-	}
-
-	// Muovi gli automi qualificati
-	for _, aut := range automiRispondenti {
-		if p.esistePercorsoLibero(aut.Posizione, sorgente) {
-			aut.Posizione = sorgente
-		}
+		aut.gestisciRichiamo(sorgente)
 	}
 }
-#+end_src go
+// Richiamo:1 ends here
 
+// [[file:main.org::*Richiamo][Richiamo:2]]
+func (a *automa) gestisciRichiamo(sorgente punto) {
+	// Il punto è che faccio bfs ma aggiungo soltanto i punti la cui distanza  dalla sorgente è diminuita di 1.
+}
+// Richiamo:2 ends here
+
+// [[file:main.org::*Richiamo][Richiamo:3]]
 // Posizioni stampa le posizioni degli automi che corrispondono al prefisso
 func (p *Piano) Posizioni(alpha string) {
 	// Ottieni automi corrispondenti ordinati per nome
@@ -293,4 +280,4 @@ func segno(x int) int {
 	}
 	return 0
 }
-// Richiamo:1 ends here
+// Richiamo:3 ends here
