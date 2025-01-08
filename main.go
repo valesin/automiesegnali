@@ -1,258 +1,162 @@
+// [[file:main.org::*Inizio][Inizio:1]]
 package automiesegnali
+
 
 import (
 	"fmt"
 	"sort"
 )
+// Inizio:1 ends here
 
-// Point represents a position in the 2D grid
-type Point struct {
+// [[file:main.org::*Definizioni][Definizioni:1]]
+// punto rappresenta una posizione nella griglia 2D
+type punto struct {
 	X, Y int
 }
 
-// Automaton represents a single automaton
-type Automaton struct {
-	Name     string
-	Position Point
+// automa rappresenta un singolo automa
+type automa struct {
+	Nome      string
+	Posizione punto
 }
 
-// Obstacle represents a rectangular obstacle
-type Obstacle struct {
-	BottomLeft Point
-	TopRight   Point
+// ostacolo rappresenta un ostacolo rettangolare
+type ostacolo struct {
+	AngoloInferioreSinistro punto
+	AngoloSuperioreDestro   punto
 }
 
-// Plane represents the entire system
-type Plane struct {
-	automata  map[string]*Automaton
-	obstacles []*Obstacle
+// piano rappresenta l'intero sistema
+type piano struct {
+	automa   map[string]*automa
+	ostacoli []*ostacolo
 }
+// Definizioni:1 ends here
 
-// Create creates an empty plane
-func Create() *Plane {
-	return &Plane{
-		automata:  make(map[string]*Automaton),
-		obstacles: make([]*Obstacle, 0),
+// [[file:main.org::*Utilities][Utilities:1]]
+
+// newPiano crea un piano vuoto
+func Crea() *piano {
+	return &piano{
+		automa:   make(map[string]*automa),
+		ostacoli: make([]*ostacolo, 0),
 	}
 }
 
-// State prints what is at the given location
-func (p *Plane) State(x, y int) {
-	point := Point{X: x, Y: y}
-
-	// Check if point is in any obstacle
-	if p.isPointInObstacle(point) {
-		fmt.Println("O")
-		return
-	}
-
-	// Check if point contains an automaton
-	for _, aut := range p.automata {
-		if aut.Position == point {
-			fmt.Println("A")
-			return
-		}
-	}
-
-	// If none of the previous conditions is met, the point is empty
-	fmt.Println("E")
-}
-
-// TODO
-// Print prints the lists of automata and obstacles
-func (p *Plane) Print() {
-	// Get sorted list of automaton names for consistent output
-	names := make([]string, 0, len(p.automata))
-	for name := range p.automata {
-		names = append(names, name)
-	}
-	sort.Strings(names)
-
-	// Print automata
-	for _, name := range names {
-		a := p.automata[name]
-		fmt.Printf("automaton %d %d %s\n", a.Position.X, a.Position.Y, a.Name)
-	}
-
-	// Print obstacles
-	for _, obs := range p.obstacles {
-		fmt.Printf("obstacle %d %d %d %d\n",
-			obs.BottomLeft.X, obs.BottomLeft.Y,
-			obs.TopRight.X, obs.TopRight.Y)
-	}
-}
-
-// isPointInObstacle checks if a point is inside any obstacle
-func (p *Plane) isPointInObstacle(point Point) bool {
-	for _, obs := range p.obstacles {
-		if point.X >= obs.BottomLeft.X && point.X <= obs.TopRight.X &&
-			point.Y >= obs.BottomLeft.Y && point.Y <= obs.TopRight.Y {
+// isPuntoInOstacolo controlla se un punto è dentro un ostacolo
+func (p *piano) isPuntoInOstacolo(punto punto) bool {
+	for _, ost := range p.ostacoli {
+		if punto.X >= ost.AngoloInferioreSinistro.X && punto.X <= ost.AngoloSuperioreDestro.X &&
+			punto.Y >= ost.AngoloInferioreSinistro.Y && punto.Y <= ost.AngoloSuperioreDestro.Y {
 			return true
 		}
 	}
 	return false
 }
 
-// Automaton adds or moves an automaton
-func (p *Plane) Automaton(x, y int, name string) {
-	point := Point{X: x, Y: y}
+// isPuntoUnAutoma checks if a point is an automaton
+func (p *piano) isPuntoUnAutoma(punto punto) bool {
+    for _, aut := range p.automati {
+        if aut.Posizione == punto {
+            return true
+        }
+    }
+    return false
+}
 
-	// Check if point is in obstacle
-	if p.isPointInObstacle(point) {
+// isAutomaInOstacolo checks if there is any automaton within the given obstacle
+func (p *piano) isOstacoloSuPunto(ostacolo ostacolo) bool {
+    for _, aut := range p.automati {
+        if aut.Posizione.X >= ostacolo.BottomLeft.X && aut.Posizione.X <= ostacolo.TopRight.X &&
+            aut.Posizione.Y >= ostacolo.BottomLeft.Y && aut.Posizione.Y <= ostacolo.TopRight.Y {
+            return true
+        }
+    }
+    return false
+}
+// Utilities:1 ends here
+
+// [[file:main.org::*Stato][Stato:1]]
+// Stato stampa cosa c'è nella posizione data
+func (p *piano) Stato(x, y int) {
+	punto := punto{X: x, Y: y}
+
+	// Controlla se il punto è in un ostacolo
+	if p.isPuntoInOstacolo(punto) {
+		fmt.Println("O")
 		return
 	}
 
-	// Create or move automaton
-	p.automata[name] = &Automaton{
-		Name:     name,
-		Position: point,
+	// Controlla se il punto contiene un automa
+	if p.isPuntoUnAutoma(punto) {
+		fmt.Println("A")
+		return
+	}
+
+	// Se nessuna delle condizioni precedenti è soddisfatta, il punto è vuoto
+	fmt.Println("E")
+}
+// Stato:1 ends here
+
+// [[file:main.org::*Stampa][Stampa:1]]
+// Stampa stampa le liste degli automi e degli ostacoli
+func (p *piano) Stampa() {
+	// Ottieni l'elenco ordinato dei nomi degli automi per output coerente
+	nomi := make([]string, 0, len(p.automa))
+	for nome := range p.automa {
+		nomi = append(nomi, nome)
+	}
+	sort.Strings(nomi)
+
+	// Stampa automi
+	for _, nome := range nomi {
+		a := p.automa[nome]
+		fmt.Printf("automa %d %d %s\n", a.Posizione.X, a.Posizione.Y, a.Nome)
+	}
+
+	// Stampa ostacoli
+	for _, ost := range p.ostacoli {
+		fmt.Printf("ostacolo %d %d %d %d\n",
+			ost.AngoloInferioreSinistro.X, ost.AngoloInferioreSinistro.Y,
+			ost.AngoloSuperioreDestro.X, ost.AngoloSuperioreDestro.Y)
 	}
 }
+// Stampa:1 ends here
 
-// Obstacle adds an obstacle if possible
-func (p *Plane) Obstacle(x0, y0, x1, y1 int) {
-	// Check if any automaton is in the proposed obstacle area
-	for _, aut := range p.automata {
-		if aut.Position.X >= x0 && aut.Position.X <= x1 &&
-			aut.Position.Y >= y0 && aut.Position.Y <= y1 {
-			return
-		}
+// [[file:main.org::*Automa][Automa:1]]
+// Automa aggiunge o sposta un automa
+func (p *piano) Automa(x, y int, nome string) {
+	punto := punto{X: x, Y: y}
+
+	// Controlla se il punto è in un ostacolo
+	if p.isPuntoInOstacolo(punto) {
+		return
 	}
 
-	// Add obstacle
-	p.obstacles = append(p.obstacles, &Obstacle{
-		BottomLeft: Point{X: x0, Y: y0},
-		TopRight:   Point{X: x1, Y: y1},
+	// Crea o sposta automa
+	p.automa[nome] = &automa{
+		Nome:      nome,
+		Posizione: punto,
+	}
+}
+// Automa:1 ends here
+
+// [[file:main.org::*Ostacolo][Ostacolo:1]]
+// Ostacolo aggiunge un ostacolo se possibile
+func (p *piano) Ostacolo(x0, y0, x1, y1 int) {
+	ostacolo := ostacolo{
+		AngoloInferioreSinistro: punto{X: x0, Y: y0}
+		AngoloSuperioreDestro: punto{X: x1, Y: y1}
+		}
+	// Controlla se un automa è nell'area proposta per l'ostacolo
+	p.isOstacoloSuPunto(ostacolo) {
+		return
+	}
+
+	// Aggiungi ostacolo
+	p.ostacoli = append(p.ostacoli, &Ostacolo{
+		AngoloInferioreSinistro: Punto{X: x0, Y: y0},
+		AngoloSuperioreDestro:   Punto{X: x1, Y: y1},
 	})
 }
-
-// Manhattan distance calculation
-func distance(a, b Point) int {
-	return abs(b.X-a.X) + abs(b.Y-b.Y)
-}
-
-func abs(x int) int {
-	if x < 0 {
-		return -x
-	}
-	return x
-}
-
-// isPrefix checks if α is a prefix of η
-func isPrefix(alpha, eta string) bool {
-	if len(alpha) > len(eta) {
-		return false
-	}
-	return eta[:len(alpha)] == alpha
-}
-
-// Recall emits a signal from point (x,y)
-func (p *Plane) Recall(x, y int, alpha string) {
-	source := Point{X: x, Y: y}
-
-	// If source is in obstacle, no movement possible
-	if p.isPointInObstacle(source) {
-		return
-	}
-
-	// Find responding automata and minimum distance
-	respondingAutomata := make([]*Automaton, 0)
-	minDist := -1
-
-	for _, aut := range p.automata {
-		if isPrefix(alpha, aut.Name) {
-			dist := distance(source, aut.Position)
-			if minDist == -1 || dist < minDist {
-				minDist = dist
-				respondingAutomata = respondingAutomata[:0]
-				respondingAutomata = append(respondingAutomata, aut)
-			} else if dist == minDist {
-				respondingAutomata = append(respondingAutomata, aut)
-			}
-		}
-	}
-
-	// Move qualifying automata
-	for _, aut := range respondingAutomata {
-		if p.existsFreePath(aut.Position, source) {
-			aut.Position = source
-		}
-	}
-}
-
-// Positions prints positions of automata matching prefix
-func (p *Plane) Positions(alpha string) {
-	// Get matching automata sorted by name
-	matching := make([]string, 0)
-	for name := range p.automata {
-		if isPrefix(alpha, name) {
-			matching = append(matching, name)
-		}
-	}
-	sort.Strings(matching)
-
-	// Print positions
-	for _, name := range matching {
-		aut := p.automata[name]
-		fmt.Printf("%s %d %d\n", name, aut.Position.X, aut.Position.Y)
-	}
-}
-
-// ExistsPath checks if a free path exists
-func (p *Plane) ExistsPath(x, y int, name string) {
-	dest := Point{X: x, Y: y}
-
-	// Check if automaton exists and destination is valid
-	aut, exists := p.automata[name]
-	if !exists || p.isPointInObstacle(dest) {
-		fmt.Println("NO")
-		return
-	}
-
-	if p.existsFreePath(aut.Position, dest) {
-		fmt.Println("YES")
-	} else {
-		fmt.Println("NO")
-	}
-}
-
-// existsFreePath checks if there exists a free path of minimum length
-func (p *Plane) existsFreePath(from, to Point) bool {
-	// Implementation of path finding algorithm
-	// This is a simplified version that checks if any point in the
-	// minimum distance path intersects with obstacles
-
-	// Get the direction of movement
-	dx := sign(to.X - from.X)
-	dy := sign(to.Y - from.Y)
-
-	current := from
-
-	// First try horizontal movement
-	for current.X != to.X {
-		current.X += dx
-		if p.isPointInObstacle(current) {
-			return false
-		}
-	}
-
-	// Then vertical movement
-	for current.Y != to.Y {
-		current.Y += dy
-		if p.isPointInObstacle(current) {
-			return false
-		}
-	}
-
-	return true
-}
-
-func sign(x int) int {
-	if x < 0 {
-		return -1
-	}
-	if x > 0 {
-		return 1
-	}
-	return 0
-}
+// Ostacolo:1 ends here

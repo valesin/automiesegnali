@@ -1,96 +1,44 @@
-#+PROPERTY: header-args:go :main no :noweb :exports both :tangle yes :package 'discard :comments link
-* Automi e segnali
-** Tasks
-*** TODO Finire organizzazione sezioni
-** Inizio
-#+begin_src go
 package automiesegnali
-
 
 import (
 	"fmt"
 	"sort"
 )
-#+end_src
 
-** Definizioni
-Ogni punto è rappresentato da una coppia di interi. Ho scelto di rappresentare attraverso =int= e non =uint= perchè di fronte al vantaggio di un bit in più, si avrebbe uno svantaggio nella chiarezza del codice, in quanto sarebbero necessarie molteplici conversioni, ad esempio ogni volta che viene effettuata un operazione che potrebbe temporaneamente utilizzare dei valori negativi.
-#+begin_src go
-// punto rappresenta una posizione nella griglia 2D
-type punto struct {
+// Punto rappresenta una posizione nella griglia 2D
+type Punto struct {
 	X, Y int
 }
 
-// automa rappresenta un singolo automa
-type automa struct {
+// Automa rappresenta un singolo automa
+type Automa struct {
 	Nome      string
-	Posizione punto
+	Posizione Punto
 }
 
-// ostacolo rappresenta un ostacolo rettangolare
-type ostacolo struct {
-	AngoloInferioreSinistro punto
-	AngoloSuperioreDestro   punto
+// Ostacolo rappresenta un ostacolo rettangolare
+type Ostacolo struct {
+	AngoloInferioreSinistro Punto
+	AngoloSuperioreDestro   Punto
 }
 
-// piano rappresenta l'intero sistema
-type piano struct {
-	automa   map[string]*automa
-	ostacoli []*ostacolo
+// Piano rappresenta l'intero sistema
+type Piano struct {
+	automa   map[string]*Automa
+	ostacoli []*Ostacolo
 }
-#+end_src
-** Funzioni
-*** Utilities
-Innanzitutto definisco delle funzioni che mi torneranno utili in diverse occasioni.
-#+begin_src go
 
-// newPiano crea un piano vuoto
-func Crea() *piano {
-	return &piano{
-		automa:   make(map[string]*automa),
-		ostacoli: make([]*ostacolo, 0),
+// Crea crea un piano vuoto
+func Crea() *Piano {
+	return &Piano{
+		automa:   make(map[string]*Automa),
+		ostacoli: make([]*Ostacolo, 0),
 	}
 }
 
-// isPuntoInOstacolo controlla se un punto è dentro un ostacolo
-func (p *piano) isPuntoInOstacolo(punto punto) bool {
-	for _, ost := range p.ostacoli {
-		if punto.X >= ost.AngoloInferioreSinistro.X && punto.X <= ost.AngoloSuperioreDestro.X &&
-			punto.Y >= ost.AngoloInferioreSinistro.Y && punto.Y <= ost.AngoloSuperioreDestro.Y {
-			return true
-		}
-	}
-	return false
-}
-
-// isPuntoUnAutoma checks if a point is an automaton
-func (p *piano) isPuntoUnAutoma(punto punto) bool {
-    for _, aut := range p.automati {
-	if aut.Posizione == punto {
-	    return true
-	}
-    }
-    return false
-}
-
-// isAutomaInOstacolo checks if there is any automaton within the given obstacle
-func (p *piano) isOstacoloSuPunto(ostacolo ostacolo) bool {
-    for _, aut := range p.automati {
-	if aut.Posizione.X >= ostacolo.BottomLeft.X && aut.Posizione.X <= ostacolo.TopRight.X &&
-	    aut.Posizione.Y >= ostacolo.BottomLeft.Y && aut.Posizione.Y <= ostacolo.TopRight.Y {
-	    return true
-	}
-    }
-    return false
-}
-#+end_src
-
-*** Stato
-
-#+begin_src go
 // Stato stampa cosa c'è nella posizione data
-func (p *piano) Stato(x, y int) {
-	punto := punto{X: x, Y: y}
+func (p *Piano) Stato(x, y int) {
+	punto := Punto{X: x, Y: y}
 
 	// Controlla se il punto è in un ostacolo
 	if p.isPuntoInOstacolo(punto) {
@@ -99,20 +47,20 @@ func (p *piano) Stato(x, y int) {
 	}
 
 	// Controlla se il punto contiene un automa
-	if p.isPuntoUnAutoma(punto) {
-		fmt.Println("A")
-		return
+	for _, aut := range p.automa {
+		if aut.Posizione == punto {
+			fmt.Println("A")
+			return
+		}
 	}
 
 	// Se nessuna delle condizioni precedenti è soddisfatta, il punto è vuoto
 	fmt.Println("E")
 }
-#+end_src
 
-*** TODO Stampa
-#+begin_src go
+// TODO
 // Stampa stampa le liste degli automi e degli ostacoli
-func (p *piano) Stampa() {
+func (p *Piano) Stampa() {
 	// Ottieni l'elenco ordinato dei nomi degli automi per output coerente
 	nomi := make([]string, 0, len(p.automa))
 	for nome := range p.automa {
@@ -133,14 +81,21 @@ func (p *piano) Stampa() {
 			ost.AngoloSuperioreDestro.X, ost.AngoloSuperioreDestro.Y)
 	}
 }
-#+end_src
 
-*** Automa
-Questa funzione è definita in modo che la sovrascrittura venga eseguita automaticamente sovrascrivendo il contenuto della mappa.
-#+begin_src go
+// isPuntoInOstacolo controlla se un punto è dentro un ostacolo
+func (p *Piano) isPuntoInOstacolo(punto Punto) bool {
+	for _, ost := range p.ostacoli {
+		if punto.X >= ost.AngoloInferioreSinistro.X && punto.X <= ost.AngoloSuperioreDestro.X &&
+			punto.Y >= ost.AngoloInferioreSinistro.Y && punto.Y <= ost.AngoloSuperioreDestro.Y {
+			return true
+		}
+	}
+	return false
+}
+
 // Automa aggiunge o sposta un automa
-func (p *piano) Automa(x, y int, nome string) {
-	punto := punto{X: x, Y: y}
+func (p *Piano) Automa(x, y int, nome string) {
+	punto := Punto{X: x, Y: y}
 
 	// Controlla se il punto è in un ostacolo
 	if p.isPuntoInOstacolo(punto) {
@@ -148,24 +103,20 @@ func (p *piano) Automa(x, y int, nome string) {
 	}
 
 	// Crea o sposta automa
-	p.automa[nome] = &automa{
+	p.automa[nome] = &Automa{
 		Nome:      nome,
 		Posizione: punto,
 	}
 }
-#+end_src
 
-*** Ostacolo
-#+begin_src go
 // Ostacolo aggiunge un ostacolo se possibile
-func (p *piano) Ostacolo(x0, y0, x1, y1 int) {
-	ostacolo := ostacolo{
-		AngoloInferioreSinistro: punto{X: x0, Y: y0}
-		AngoloSuperioreDestro: punto{X: x1, Y: y1}
-		}
+func (p *Piano) Ostacolo(x0, y0, x1, y1 int) {
 	// Controlla se un automa è nell'area proposta per l'ostacolo
-	p.isOstacoloSuPunto(ostacolo) {
-		return
+	for _, aut := range p.automa {
+		if aut.Posizione.X >= x0 && aut.Posizione.X <= x1 &&
+			aut.Posizione.Y >= y0 && aut.Posizione.Y <= y1 {
+			return
+		}
 	}
 
 	// Aggiungi ostacolo
@@ -174,10 +125,7 @@ func (p *piano) Ostacolo(x0, y0, x1, y1 int) {
 		AngoloSuperioreDestro:   Punto{X: x1, Y: y1},
 	})
 }
-#+end_src
-*** Richiamo
-Prima mi creo delle funzioni per la distanza e per recuperare gli automi interessati.
-#+begin_src go
+
 // Calcolo della distanza di Manhattan
 func distanza(a, b Punto) int {
 	return abs(b.X-a.X) + abs(b.Y-b.Y)
@@ -231,7 +179,6 @@ func (p *Piano) Richiamo(x, y int, alpha string) {
 		}
 	}
 }
-#+end_src go
 
 // Posizioni stampa le posizioni degli automi che corrispondono al prefisso
 func (p *Piano) Posizioni(alpha string) {
@@ -309,5 +256,3 @@ func segno(x int) int {
 	}
 	return 0
 }
-#+end_src
-
