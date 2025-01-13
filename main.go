@@ -2,7 +2,6 @@
 package automiesegnali
 
 
-
 import (
 	"fmt"
 	"sort"
@@ -12,7 +11,7 @@ import (
 // [[file:main.org::*Definizioni][Definizioni:1]]
 // punto rappresenta una posizione nella griglia 2D
 type punto struct {
-	X, Y int
+	x, y int
 }
 
 // automa rappresenta un singolo automa
@@ -29,57 +28,15 @@ type ostacolo struct {
 
 // piano rappresenta l'intero sistema
 type piano struct {
-	automa   map[string]*automa
+	automi   map[string]*automa
 	ostacoli []*ostacolo
 }
 // Definizioni:1 ends here
 
-// [[file:main.org::*Utilities][Utilities:1]]
-// newPiano crea un piano vuoto
-func Crea() *piano {
-	return &piano{
-		automa:   make(map[string]*automa),
-		ostacoli: make([]*ostacolo, 0),
-	}
-}
-
-// isPuntoInOstacolo controlla se un punto è dentro un ostacolo
-func (p *piano) isPuntoInOstacolo(punto punto) bool {
-	for _, ost := range p.ostacoli {
-		if punto.X >= ost.AngoloInferioreSinistro.X && punto.X <= ost.AngoloSuperioreDestro.X &&
-			punto.Y >= ost.AngoloInferioreSinistro.Y && punto.Y <= ost.AngoloSuperioreDestro.Y {
-			return true
-		}
-	}
-	return false
-}
-
-// isPuntoUnAutoma checks if a point is an automaton
-func (p *piano) isPuntoUnAutoma(punto punto) bool {
-    for _, aut := range p.automati {
-	if aut.Posizione == punto {
-	    return true
-	}
-    }
-    return false
-}
-
-// isAutomaInOstacolo checks if there is any automaton within the given obstacle
-func (p *piano) isOstacoloSuPunto(ostacolo ostacolo) bool {
-    for _, aut := range p.automati {
-	if aut.Posizione.X >= ostacolo.BottomLeft.X && aut.Posizione.X <= ostacolo.TopRight.X &&
-	    aut.Posizione.Y >= ostacolo.BottomLeft.Y && aut.Posizione.Y <= ostacolo.TopRight.Y {
-	    return true
-	}
-    }
-    return false
-}
-// Utilities:1 ends here
-
 // [[file:main.org::*Stato][Stato:1]]
 // Stato stampa cosa c'è nella posizione data
-func (p *piano) Stato(x, y int) {
-	punto := punto{X: x, Y: y}
+func (p *piano) stato(x, y int) {
+	punto := punto{x: x, y: y}
 
 	// Controlla se il punto è in un ostacolo
 	if p.isPuntoInOstacolo(punto) {
@@ -99,26 +56,26 @@ func (p *piano) Stato(x, y int) {
 // Stato:1 ends here
 
 // [[file:main.org::*Stampa][Stampa:1]]
+func (p *piano) stampaAutomi(filter func(string)) {
+	fmt.Println("(")
+	for nome, posizione := range p.automa {
+		if filter(nome) {
+			fmt.Printf("%v:%v,%v", nome, posizione.x, posizione.y)
+		}
+	}
+	fmt.Println(")")
+
+}
 // Stampa stampa le liste degli automi e degli ostacoli
 func (p *piano) stampa() {
-	// Ottieni l'elenco ordinato dei nomi degli automi per output coerente
-	nomi := make([]string, 0, len(p.automa))
-	for nome := range p.automa {
-		nomi = append(nomi, nome)
-	}
-	sort.Strings(nomi)
-
 	// Stampa automi
-	for _, nome := range nomi {
-		a := p.automa[nome]
-		fmt.Printf("automa %d %d %s\n", a.Posizione.X, a.Posizione.Y, a.Nome)
-	}
+	p.stampaAutomi(true)
 
 	// Stampa ostacoli
 	for _, ost := range p.ostacoli {
 		fmt.Printf("ostacolo %d %d %d %d\n",
-			ost.AngoloInferioreSinistro.X, ost.AngoloInferioreSinistro.Y,
-			ost.AngoloSuperioreDestro.X, ost.AngoloSuperioreDestro.Y)
+			ost.AngoloInferioreSinistro.x, ost.AngoloInferioreSinistro.y,
+			ost.AngoloSuperioreDestro.x, ost.AngoloSuperioreDestro.y)
 	}
 }
 // Stampa:1 ends here
@@ -126,7 +83,7 @@ func (p *piano) stampa() {
 // [[file:main.org::*Automa][Automa:1]]
 // Automa aggiunge o sposta un automa
 func (p *piano) automa(x, y int, nome string) {
-	punto := punto{X: x, Y: y}
+	punto := punto{x: x, y: y}
 
 	// Controlla se il punto è in un ostacolo
 	if p.isPuntoInOstacolo(punto) {
@@ -145,8 +102,8 @@ func (p *piano) automa(x, y int, nome string) {
 // Ostacolo aggiunge un ostacolo se possibile
 func (p *piano) ostacolo(x0, y0, x1, y1 int) {
 	ostacolo := ostacolo{
-		AngoloInferioreSinistro: punto{X: x0, Y: y0}
-		AngoloSuperioreDestro: punto{X: x1, Y: y1}
+		AngoloInferioreSinistro: punto{x: x0, y: y0}
+		AngoloSuperioreDestro: punto{x: x1, y: y1}
 		}
 	// Controlla se un automa è nell'area proposta per l'ostacolo
 	p.isOstacoloSuPunto(ostacolo) {
@@ -203,7 +160,7 @@ func (a *automa) gestisciRichiamo(sorgente punto) {
 }
 // Richiamo:2 ends here
 
-// [[file:main.org::*Richiamo][Richiamo:3]]
+// [[file:main.org::*Posizioni][Posizioni:1]]
 // Posizioni stampa le posizioni degli automi che corrispondono al prefisso
 func (p *Piano) Posizioni(alpha string) {
 	// Ottieni automi corrispondenti ordinati per nome
@@ -221,7 +178,9 @@ func (p *Piano) Posizioni(alpha string) {
 		fmt.Printf("%s %d %d\n", nome, aut.Posizione.X, aut.Posizione.Y)
 	}
 }
+// Posizioni:1 ends here
 
+// [[file:main.org::*Esiste Percorso][Esiste Percorso:1]]
 // EsistePercorso controlla se esiste un percorso libero
 func (p *Piano) EsistePercorso(x, y int, nome string) {
 	dest := Punto{X: x, Y: y}
@@ -250,7 +209,7 @@ func (p *Piano) esistePercorsoLibero(da, a Punto) bool {
 	dx := segno(a.X - da.X)
 	dy := segno(a.Y - da.Y)
 
-	corrente := da
+	//corrente := da
 
 	// Prima tenta il movimento orizzontale
 	for corrente.X != a.X {
@@ -280,4 +239,38 @@ func segno(x int) int {
 	}
 	return 0
 }
-// Richiamo:3 ends here
+// Esiste Percorso:1 ends here
+
+// [[id:4805c5fe-d8e8-4cad-a8bb-0ed6bce1c769][Utilities:1]]
+// isPuntoInOstacolo controlla se un punto è dentro un ostacolo
+func (p *piano) isPuntoInOstacolo(punto punto) bool {
+	for _, ost := range p.ostacoli {
+		if punto.x >= ost.AngoloInferioreSinistro.x && punto.x <= ost.AngoloSuperioreDestro.x &&
+			punto.y >= ost.AngoloInferioreSinistro.y && punto.y <= ost.AngoloSuperioreDestro.y {
+			return true
+		}
+	}
+	return false
+}
+
+// isPuntoUnAutoma checks if a point is an automaton
+func (p *piano) isPuntoUnAutoma(punto punto) bool {
+    for _, aut := range p.automati {
+	if aut.Posizione == punto {
+	    return true
+	}
+    }
+    return false
+}
+
+// isAutomaInOstacolo checks if there is any automaton within the given obstacle
+func (p *piano) isOstacoloSuPunto(ostacolo ostacolo) bool {
+    for _, aut := range p.automati {
+	if aut.Posizione.X >= ostacolo.BottomLeft.X && aut.Posizione.X <= ostacolo.TopRight.X &&
+	    aut.Posizione.Y >= ostacolo.BottomLeft.Y && aut.Posizione.Y <= ostacolo.TopRight.Y {
+	    return true
+	}
+    }
+    return false
+}
+// Utilities:1 ends here
