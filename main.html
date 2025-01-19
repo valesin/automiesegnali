@@ -3,7 +3,7 @@
 "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
-<!-- 2025-01-13 Mon 17:35 -->
+<!-- 2025-01-16 Thu 15:26 -->
 <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>&lrm;</title>
@@ -200,23 +200,36 @@
 <h2>Table of Contents</h2>
 <div id="text-table-of-contents" role="doc-toc">
 <ul>
-<li><a href="#orgf59b61e">1. Automi e segnali</a>
+<li><a href="#orgbfb96fd">1. Automi e segnali</a>
 <ul>
-<li><a href="#orgf374d3f">1.1. Tasks</a>
+<li><a href="#org3d47676">1.1. Tasks</a>
 <ul>
-<li><a href="#org0a1c6c2">1.1.1. <span class="todo TODO">TODO</span> Finire organizzazione sezioni</a></li>
+<li><a href="#org38606ac">1.1.1. <span class="todo TODO">TODO</span> Finire organizzazione sezioni</a></li>
 </ul>
 </li>
-<li><a href="#orgc944664">1.2. Inizio</a></li>
-<li><a href="#orgcbe1712">1.3. Definizioni</a></li>
-<li><a href="#orgff51773">1.4. Funzioni</a>
+<li><a href="#org389a344">1.2. Spiegazione e analisi del problema</a>
 <ul>
-<li><a href="#org941150e">1.4.1. Utilities</a></li>
-<li><a href="#org9e21cc2">1.4.2. Stato</a></li>
-<li><a href="#org5aa792f">1.4.3. <span class="todo TODO">TODO</span> Stampa</a></li>
-<li><a href="#org832c253">1.4.4. Automa</a></li>
-<li><a href="#org8b82e8c">1.4.5. Ostacolo</a></li>
-<li><a href="#orgd921fd5">1.4.6. Richiamo</a></li>
+<li><a href="#orgb761104">1.2.1. Definizioni</a></li>
+<li><a href="#org672b38b">1.2.2. Backbone</a></li>
+</ul>
+</li>
+<li><a href="#orgcd431de">1.3. Backbone</a></li>
+<li><a href="#org49abc6c">1.4. Funzioni</a>
+<ul>
+<li><a href="#org68cb635">1.4.1. Stato</a></li>
+<li><a href="#org1cb9749">1.4.2. <span class="todo TODO">TODO</span> Stampa</a></li>
+<li><a href="#org214dc41">1.4.3. Automa</a></li>
+<li><a href="#org2a76820">1.4.4. Ostacolo</a></li>
+<li><a href="#orga65ec0c">1.4.5. Richiamo</a></li>
+<li><a href="#org5aa31e4">1.4.6. Posizioni</a></li>
+<li><a href="#org51d9a00">1.4.7. Esiste Percorso</a></li>
+<li><a href="#orga5797fc">1.4.8. Utilities</a></li>
+</ul>
+</li>
+<li><a href="#org2bc60fe">1.5. Funzioni principali</a>
+<ul>
+<li><a href="#org6b4cb02">1.5.1. Crea</a></li>
+<li><a href="#org9675eb1">1.5.2. Esegui</a></li>
 </ul>
 </li>
 </ul>
@@ -224,44 +237,48 @@
 </ul>
 </div>
 </div>
-<div id="outline-container-orgf59b61e" class="outline-2">
-<h2 id="orgf59b61e"><span class="section-number-2">1.</span> Automi e segnali</h2>
+<div id="outline-container-orgbfb96fd" class="outline-2">
+<h2 id="orgbfb96fd"><span class="section-number-2">1.</span> Automi e segnali</h2>
 <div class="outline-text-2" id="text-1">
 </div>
-<div id="outline-container-orgf374d3f" class="outline-3">
-<h3 id="orgf374d3f"><span class="section-number-3">1.1.</span> Tasks</h3>
+<div id="outline-container-org3d47676" class="outline-3">
+<h3 id="org3d47676"><span class="section-number-3">1.1.</span> Tasks</h3>
 <div class="outline-text-3" id="text-1-1">
 </div>
-<div id="outline-container-org0a1c6c2" class="outline-4">
-<h4 id="org0a1c6c2"><span class="section-number-4">1.1.1.</span> <span class="todo TODO">TODO</span> Finire organizzazione sezioni</h4>
+<div id="outline-container-org38606ac" class="outline-4">
+<h4 id="org38606ac"><span class="section-number-4">1.1.1.</span> <span class="todo TODO">TODO</span> Finire organizzazione sezioni</h4>
 </div>
 </div>
-<div id="outline-container-orgc944664" class="outline-3">
-<h3 id="orgc944664"><span class="section-number-3">1.2.</span> Inizio</h3>
+<div id="outline-container-org389a344" class="outline-3">
+<h3 id="org389a344"><span class="section-number-3">1.2.</span> Spiegazione e analisi del problema</h3>
 <div class="outline-text-3" id="text-1-2">
-<div class="org-src-container">
-<pre class="src src-go"><span style="color: #a020f0;">package</span> automiesegnali
-
-
-
-<span style="color: #a020f0;">import</span> (
-        <span style="color: #8b2252;">"fmt"</span>
-        <span style="color: #8b2252;">"sort"</span>
-)
-</pre>
-</div>
-</div>
-</div>
-<div id="outline-container-orgcbe1712" class="outline-3">
-<h3 id="orgcbe1712"><span class="section-number-3">1.3.</span> Definizioni</h3>
-<div class="outline-text-3" id="text-1-3">
 <p>
-Ogni punto è rappresentato da una coppia di interi. Ho scelto di rappresentare attraverso <code>int</code> e non <code>uint</code> perchè di fronte al vantaggio di un bit in più, si avrebbe uno svantaggio nella chiarezza del codice, in quanto sarebbero necessarie molteplici conversioni, ad esempio ogni volta che viene effettuata un operazione che potrebbe temporaneamente utilizzare dei valori negativi.
+Il problema viene formalizzato in questo modo bla bla bla.
 </p>
+
+<p>
+Per questo motivo, considero che sia una buona scelta quella di considerare gli automi come punti su un grafo infinito di cui però non viene rappresentato ogni nodo.
+</p>
+
+<p>
+Infatti, i nodi e i cammini sono impliciti nella definizione, quindi utilizzerò soltanto
+</p>
+</div>
+<div id="outline-container-orgb761104" class="outline-4">
+<h4 id="orgb761104"><span class="section-number-4">1.2.1.</span> Definizioni</h4>
+<div class="outline-text-4" id="text-1-2-1">
+<p>
+Ogni punto è rappresentato da una coppia di interi.
+</p>
+
+<p>
+Scelgo di rappresentare attraverso <code>int</code> e non <code>uint</code> perchè di fronte al vantaggio di un bit in più per la codifica, si avrebbe uno svantaggio nella chiarezza del codice, in quanto sarebbero necessarie molteplici conversioni, ad esempio ogni volta che viene effettuata un operazione che potrebbe temporaneamente utilizzare dei valori negativi.
+</p>
+
 <div class="org-src-container">
-<pre class="src src-go"><span style="color: #b22222;">// </span><span style="color: #b22222;">punto rappresenta una posizione nella griglia 2D</span>
+<pre class="src src-go" id="orgc1b8a51"><span style="color: #b22222;">// </span><span style="color: #b22222;">punto rappresenta una posizione nella griglia 2D</span>
 <span style="color: #a020f0;">type</span> <span style="color: #228b22;">punto</span> <span style="color: #a020f0;">struct</span> {
-        X, Y <span style="color: #228b22;">int</span>
+        x, y <span style="color: #228b22;">int</span>
 }
 
 <span style="color: #b22222;">// </span><span style="color: #b22222;">automa rappresenta un singolo automa</span>
@@ -278,74 +295,83 @@ Ogni punto è rappresentato da una coppia di interi. Ho scelto di rappresentare 
 
 <span style="color: #b22222;">// </span><span style="color: #b22222;">piano rappresenta l'intero sistema</span>
 <span style="color: #a020f0;">type</span> <span style="color: #228b22;">piano</span> <span style="color: #a020f0;">struct</span> {
-        automa   <span style="color: #a020f0;">map</span>[<span style="color: #228b22;">string</span>]*<span style="color: #228b22;">automa</span>
+        automi   <span style="color: #a020f0;">map</span>[<span style="color: #228b22;">string</span>]*<span style="color: #228b22;">automa</span>
         ostacoli []*<span style="color: #228b22;">ostacolo</span>
 }
 </pre>
 </div>
 </div>
 </div>
-<div id="outline-container-orgff51773" class="outline-3">
-<h3 id="orgff51773"><span class="section-number-3">1.4.</span> Funzioni</h3>
-<div class="outline-text-3" id="text-1-4">
-</div>
-<div id="outline-container-org941150e" class="outline-4">
-<h4 id="org941150e"><span class="section-number-4">1.4.1.</span> Utilities</h4>
-<div class="outline-text-4" id="text-1-4-1">
+<div id="outline-container-org672b38b" class="outline-4">
+<h4 id="org672b38b"><span class="section-number-4">1.2.2.</span> Backbone</h4>
+<div class="outline-text-4" id="text-1-2-2">
 <p>
-Innanzitutto definisco delle funzioni che mi torneranno utili in diverse occasioni.
+Di conseguenza, la struttura fondamentale è questa.
+</p>
+
+<p>
+Non uso librerie esterne.
+</p>
+
+<p>
+Blablabla.
 </p>
 <div class="org-src-container">
-<pre class="src src-go"><span style="color: #b22222;">// </span><span style="color: #b22222;">newPiano crea un piano vuoto</span>
-<span style="color: #a020f0;">func</span> <span style="color: #0000ff;">Crea</span>() *<span style="color: #228b22;">piano</span> {
-        <span style="color: #a020f0;">return</span> &amp;<span style="color: #228b22;">piano</span>{
-                <span style="color: #008b8b;">automa</span>:   <span style="color: #483d8b;">make</span>(<span style="color: #a020f0;">map</span>[<span style="color: #228b22;">string</span>]*<span style="color: #228b22;">automa</span>),
-                <span style="color: #008b8b;">ostacoli</span>: <span style="color: #483d8b;">make</span>([]*<span style="color: #228b22;">ostacolo</span>, 0),
-        }
+<pre class="src src-go"><span style="color: #a020f0;">package</span> automiesegnali
+
+<span style="color: #a020f0;">import</span> (
+        <span style="color: #8b2252;">"fmt"</span>
+)
+
+&lt;&lt;definizioni&gt;&gt;
+
+<span style="color: #a020f0;">func</span> <span style="color: #0000ff;">main</span>(){
+
 }
 
-<span style="color: #b22222;">// </span><span style="color: #b22222;">isPuntoInOstacolo controlla se un punto &#232; dentro un ostacolo</span>
-<span style="color: #a020f0;">func</span> (<span style="color: #a0522d;">p</span> *<span style="color: #228b22;">piano</span>) <span style="color: #0000ff;">isPuntoInOstacolo</span>(<span style="color: #a0522d;">punto</span> <span style="color: #228b22;">punto</span>) <span style="color: #228b22;">bool</span> {
-        <span style="color: #a020f0;">for</span> <span style="color: #a0522d;">_</span>, <span style="color: #a0522d;">ost</span> := <span style="color: #a020f0;">range</span> p.ostacoli {
-                <span style="color: #a020f0;">if</span> punto.X &gt;= ost.AngoloInferioreSinistro.X &amp;&amp; punto.X &lt;= ost.AngoloSuperioreDestro.X &amp;&amp;
-                        punto.Y &gt;= ost.AngoloInferioreSinistro.Y &amp;&amp; punto.Y &lt;= ost.AngoloSuperioreDestro.Y {
-                        <span style="color: #a020f0;">return</span> <span style="color: #008b8b;">true</span>
-                }
-        }
-        <span style="color: #a020f0;">return</span> <span style="color: #008b8b;">false</span>
+<span style="color: #a020f0;">func</span> <span style="color: #0000ff;">newPiano</span>() <span style="color: #228b22;">piano</span>{
+        &lt;&lt;newPiano&gt;&gt;
 }
 
-<span style="color: #b22222;">// </span><span style="color: #b22222;">isPuntoUnAutoma checks if a point is an automaton</span>
-<span style="color: #a020f0;">func</span> (<span style="color: #a0522d;">p</span> *<span style="color: #228b22;">piano</span>) <span style="color: #0000ff;">isPuntoUnAutoma</span>(<span style="color: #a0522d;">punto</span> <span style="color: #228b22;">punto</span>) <span style="color: #228b22;">bool</span> {
-    <span style="color: #a020f0;">for</span> <span style="color: #a0522d;">_</span>, <span style="color: #a0522d;">aut</span> := <span style="color: #a020f0;">range</span> p.automati {
-        <span style="color: #a020f0;">if</span> aut.Posizione == punto {
-            <span style="color: #a020f0;">return</span> <span style="color: #008b8b;">true</span>
-        }
-    }
-    <span style="color: #a020f0;">return</span> <span style="color: #008b8b;">false</span>
-}
-
-<span style="color: #b22222;">// </span><span style="color: #b22222;">isAutomaInOstacolo checks if there is any automaton within the given obstacle</span>
-<span style="color: #a020f0;">func</span> (<span style="color: #a0522d;">p</span> *<span style="color: #228b22;">piano</span>) <span style="color: #0000ff;">isOstacoloSuPunto</span>(<span style="color: #a0522d;">ostacolo</span> <span style="color: #228b22;">ostacolo</span>) <span style="color: #228b22;">bool</span> {
-    <span style="color: #a020f0;">for</span> <span style="color: #a0522d;">_</span>, <span style="color: #a0522d;">aut</span> := <span style="color: #a020f0;">range</span> p.automati {
-        <span style="color: #a020f0;">if</span> aut.Posizione.X &gt;= ostacolo.BottomLeft.X &amp;&amp; aut.Posizione.X &lt;= ostacolo.TopRight.X &amp;&amp;
-            aut.Posizione.Y &gt;= ostacolo.BottomLeft.Y &amp;&amp; aut.Posizione.Y &lt;= ostacolo.TopRight.Y {
-            <span style="color: #a020f0;">return</span> <span style="color: #008b8b;">true</span>
-        }
-    }
-    <span style="color: #a020f0;">return</span> <span style="color: #008b8b;">false</span>
+<span style="color: #a020f0;">func</span> <span style="color: #0000ff;">esegui</span>(<span style="color: #a0522d;">p</span> <span style="color: #228b22;">piano</span>, <span style="color: #a0522d;">s</span> <span style="color: #228b22;">string</span>) {
+        &lt;&lt;esegui&gt;&gt;
 }
 </pre>
 </div>
 </div>
 </div>
-<div id="outline-container-org9e21cc2" class="outline-4">
-<h4 id="org9e21cc2"><span class="section-number-4">1.4.2.</span> Stato</h4>
-<div class="outline-text-4" id="text-1-4-2">
+</div>
+<div id="outline-container-orgcd431de" class="outline-3">
+<h3 id="orgcd431de"><span class="section-number-3">1.3.</span> Backbone</h3>
+<div class="outline-text-3" id="text-1-3">
+<p>
+qua ci metto il main e costruisco lo "switch".
+All'interno di ogni switch inserisco il noweb &lt;&lt;&gt;&gt; per la sua specifica operazione.
+</p>
+
+<p>
+All'interno di ogni operazione, sono libero di crearmi le funzioni che voglio che verranno tanglate correttamente.
+A conclusione del paragrafo, inserisco il codice che effettivamente voglio usare sotto il nome nel &lt;&lt;&gt;&gt; così che venga sostituito al posto giusto
+</p>
+</div>
+</div>
+<div id="outline-container-org49abc6c" class="outline-3">
+<h3 id="org49abc6c"><span class="section-number-3">1.4.</span> Funzioni</h3>
+<div class="outline-text-3" id="text-1-4">
+<p>
+#+end<sub>src</sub>
+</p>
+</div>
+<div id="outline-container-org68cb635" class="outline-4">
+<h4 id="org68cb635"><span class="section-number-4">1.4.1.</span> Stato</h4>
+<div class="outline-text-4" id="text-1-4-1">
+<p>
+La funzione di stato utilizza due funzioni mostrate nella sezione <a href="#orga5797fc">Utilities</a> per identificare la presenza di un ostacolo o un automa in un dato punto.
+</p>
 <div class="org-src-container">
 <pre class="src src-go"><span style="color: #b22222;">// </span><span style="color: #b22222;">Stato stampa cosa c'&#232; nella posizione data</span>
-<span style="color: #a020f0;">func</span> (<span style="color: #a0522d;">p</span> *<span style="color: #228b22;">piano</span>) <span style="color: #0000ff;">Stato</span>(<span style="color: #a0522d;">x</span>, <span style="color: #a0522d;">y</span> <span style="color: #228b22;">int</span>) {
-        <span style="color: #a0522d;">punto</span> := <span style="color: #228b22;">punto</span>{<span style="color: #008b8b;">X</span>: x, <span style="color: #008b8b;">Y</span>: y}
+<span style="color: #a020f0;">func</span> (<span style="color: #a0522d;">p</span> *<span style="color: #228b22;">piano</span>) <span style="color: #0000ff;">stato</span>(<span style="color: #a0522d;">x</span>, <span style="color: #a0522d;">y</span> <span style="color: #228b22;">int</span>) {
+        <span style="color: #a0522d;">punto</span> := <span style="color: #228b22;">punto</span>{<span style="color: #008b8b;">x</span>: x, <span style="color: #008b8b;">y</span>: y}
 
         <span style="color: #b22222;">// </span><span style="color: #b22222;">Controlla se il punto &#232; in un ostacolo</span>
         <span style="color: #a020f0;">if</span> p.<span style="color: #0000ff;">isPuntoInOstacolo</span>(punto) {
@@ -366,46 +392,53 @@ Innanzitutto definisco delle funzioni che mi torneranno utili in diverse occasio
 </div>
 </div>
 </div>
-<div id="outline-container-org5aa792f" class="outline-4">
-<h4 id="org5aa792f"><span class="section-number-4">1.4.3.</span> <span class="todo TODO">TODO</span> Stampa</h4>
-<div class="outline-text-4" id="text-1-4-3">
+<div id="outline-container-org1cb9749" class="outline-4">
+<h4 id="org1cb9749"><span class="section-number-4">1.4.2.</span> <span class="todo TODO">TODO</span> Stampa</h4>
+<div class="outline-text-4" id="text-1-4-2">
+<p>
+La funzione di stampa 
+</p>
 <div class="org-src-container">
-<pre class="src src-go"><span style="color: #b22222;">// </span><span style="color: #b22222;">Stampa stampa le liste degli automi e degli ostacoli</span>
+<pre class="src src-go"><span style="color: #a020f0;">func</span> (<span style="color: #a0522d;">p</span> *<span style="color: #228b22;">piano</span>) <span style="color: #0000ff;">stampaAutomi</span>(<span style="color: #a0522d;">filter</span> <span style="color: #a020f0;">func</span>(<span style="color: #228b22;">string</span>)) {
+        fmt.<span style="color: #0000ff;">Println</span>(<span style="color: #8b2252;">"("</span>)
+        <span style="color: #a020f0;">for</span> <span style="color: #a0522d;">nome</span>, <span style="color: #a0522d;">posizione</span> := <span style="color: #a020f0;">range</span> p.automa {
+                <span style="color: #a020f0;">if</span> <span style="color: #0000ff;">filter</span>(nome) {
+                        fmt.<span style="color: #0000ff;">Printf</span>(<span style="color: #8b2252;">"%v:%v,%v"</span>, nome, posizione.x, posizione.y)
+                }
+        }
+        fmt.<span style="color: #0000ff;">Println</span>(<span style="color: #8b2252;">")"</span>)
+}
+<span style="color: #a020f0;">func</span> (<span style="color: #a0522d;">p</span> *<span style="color: #228b22;">piano</span>) <span style="color: #0000ff;">stampaOstacoli</span>() {
+        fmt.<span style="color: #0000ff;">Println</span>(<span style="color: #8b2252;">"["</span>)
+        <span style="color: #a020f0;">for</span> <span style="color: #a0522d;">_</span>, <span style="color: #a0522d;">ostacolo</span> := <span style="color: #a020f0;">range</span> p.ostacoli {
+                fmt.<span style="color: #0000ff;">Printf</span>(<span style="color: #8b2252;">"(%v,%v)(%v,%v)"</span>,
+                        ostacolo.AngoloInferioreSinistro.x
+                        ostacolo.AngoloInferioreSinistro.y
+                        ostacolo.AngoloInferioreDestro.x
+                        ostacolo.AngoloInferioreDestro.y)
+        }
+        fmt.<span style="color: #0000ff;">Println</span>(<span style="color: #8b2252;">"]"</span>)
+}
+
+<span style="color: #b22222;">// </span><span style="color: #b22222;">Stampa stampa le liste degli automi e degli ostacoli</span>
 <span style="color: #a020f0;">func</span> (<span style="color: #a0522d;">p</span> *<span style="color: #228b22;">piano</span>) <span style="color: #0000ff;">stampa</span>() {
-        <span style="color: #b22222;">// </span><span style="color: #b22222;">Ottieni l'elenco ordinato dei nomi degli automi per output coerente</span>
-        <span style="color: #a0522d;">nomi</span> := <span style="color: #483d8b;">make</span>([]<span style="color: #228b22;">string</span>, 0, <span style="color: #483d8b;">len</span>(p.automa))
-        <span style="color: #a020f0;">for</span> <span style="color: #a0522d;">nome</span> := <span style="color: #a020f0;">range</span> p.automa {
-                nomi = <span style="color: #483d8b;">append</span>(nomi, nome)
-        }
-        sort.<span style="color: #0000ff;">Strings</span>(nomi)
-
-        <span style="color: #b22222;">// </span><span style="color: #b22222;">Stampa automi</span>
-        <span style="color: #a020f0;">for</span> <span style="color: #a0522d;">_</span>, <span style="color: #a0522d;">nome</span> := <span style="color: #a020f0;">range</span> nomi {
-                <span style="color: #a0522d;">a</span> := p.automa[nome]
-                fmt.<span style="color: #0000ff;">Printf</span>(<span style="color: #8b2252;">"automa %d %d %s\n"</span>, a.Posizione.X, a.Posizione.Y, a.Nome)
-        }
-
-        <span style="color: #b22222;">// </span><span style="color: #b22222;">Stampa ostacoli</span>
-        <span style="color: #a020f0;">for</span> <span style="color: #a0522d;">_</span>, <span style="color: #a0522d;">ost</span> := <span style="color: #a020f0;">range</span> p.ostacoli {
-                fmt.<span style="color: #0000ff;">Printf</span>(<span style="color: #8b2252;">"ostacolo %d %d %d %d\n"</span>,
-                        ost.AngoloInferioreSinistro.X, ost.AngoloInferioreSinistro.Y,
-                        ost.AngoloSuperioreDestro.X, ost.AngoloSuperioreDestro.Y)
-        }
+        p.<span style="color: #0000ff;">stampaAutomi</span>(<span style="color: #008b8b;">true</span>)
+        p.<span style="color: #0000ff;">stampaOstacoli</span>()
 }
 </pre>
 </div>
 </div>
 </div>
-<div id="outline-container-org832c253" class="outline-4">
-<h4 id="org832c253"><span class="section-number-4">1.4.4.</span> Automa</h4>
-<div class="outline-text-4" id="text-1-4-4">
+<div id="outline-container-org214dc41" class="outline-4">
+<h4 id="org214dc41"><span class="section-number-4">1.4.3.</span> Automa</h4>
+<div class="outline-text-4" id="text-1-4-3">
 <p>
 Questa funzione è definita in modo che la sovrascrittura venga eseguita automaticamente sovrascrivendo il contenuto della mappa.
 </p>
 <div class="org-src-container">
 <pre class="src src-go"><span style="color: #b22222;">// </span><span style="color: #b22222;">Automa aggiunge o sposta un automa</span>
-<span style="color: #a020f0;">func</span> (<span style="color: #a0522d;">p</span> *<span style="color: #228b22;">piano</span>) <span style="color: #0000ff;">automa</span>(<span style="color: #a0522d;">x</span>, <span style="color: #a0522d;">y</span> <span style="color: #228b22;">int</span>, <span style="color: #a0522d;">nome</span> <span style="color: #228b22;">string</span>) {
-        <span style="color: #a0522d;">punto</span> := <span style="color: #228b22;">punto</span>{<span style="color: #008b8b;">X</span>: x, <span style="color: #008b8b;">Y</span>: y}
+<span style="color: #a020f0;">func</span> (<span style="color: #a0522d;">p</span> *<span style="color: #228b22;">piano</span>) <span style="color: #0000ff;">aggiungiAutoma</span>(<span style="color: #a0522d;">x</span>, <span style="color: #a0522d;">y</span> <span style="color: #228b22;">int</span>, <span style="color: #a0522d;">nome</span> <span style="color: #228b22;">string</span>) {
+        <span style="color: #a0522d;">punto</span> := <span style="color: #228b22;">punto</span>{<span style="color: #008b8b;">x</span>: x, <span style="color: #008b8b;">y</span>: y}
 
         <span style="color: #b22222;">// </span><span style="color: #b22222;">Controlla se il punto &#232; in un ostacolo</span>
         <span style="color: #a020f0;">if</span> p.<span style="color: #0000ff;">isPuntoInOstacolo</span>(punto) {
@@ -422,18 +455,18 @@ Questa funzione è definita in modo che la sovrascrittura venga eseguita automat
 </div>
 </div>
 </div>
-<div id="outline-container-org8b82e8c" class="outline-4">
-<h4 id="org8b82e8c"><span class="section-number-4">1.4.5.</span> Ostacolo</h4>
-<div class="outline-text-4" id="text-1-4-5">
+<div id="outline-container-org2a76820" class="outline-4">
+<h4 id="org2a76820"><span class="section-number-4">1.4.4.</span> Ostacolo</h4>
+<div class="outline-text-4" id="text-1-4-4">
 <div class="org-src-container">
 <pre class="src src-go"><span style="color: #b22222;">// </span><span style="color: #b22222;">Ostacolo aggiunge un ostacolo se possibile</span>
-<span style="color: #a020f0;">func</span> (<span style="color: #a0522d;">p</span> *<span style="color: #228b22;">piano</span>) <span style="color: #0000ff;">ostacolo</span>(<span style="color: #a0522d;">x0</span>, <span style="color: #a0522d;">y0</span>, <span style="color: #a0522d;">x1</span>, <span style="color: #a0522d;">y1</span> <span style="color: #228b22;">int</span>) {
+<span style="color: #a020f0;">func</span> (<span style="color: #a0522d;">p</span> *<span style="color: #228b22;">piano</span>) <span style="color: #0000ff;">aggiungiOstacolo</span>(<span style="color: #a0522d;">x0</span>, <span style="color: #a0522d;">y0</span>, <span style="color: #a0522d;">x1</span>, <span style="color: #a0522d;">y1</span> <span style="color: #228b22;">int</span>) {
         <span style="color: #a0522d;">ostacolo</span> := <span style="color: #228b22;">ostacolo</span>{
-                <span style="color: #008b8b;">AngoloInferioreSinistro</span>: <span style="color: #228b22;">punto</span>{<span style="color: #008b8b;">X</span>: x0, <span style="color: #008b8b;">Y</span>: y0}
-                <span style="color: #008b8b;">AngoloSuperioreDestro</span>: <span style="color: #228b22;">punto</span>{<span style="color: #008b8b;">X</span>: x1, <span style="color: #008b8b;">Y</span>: y1}
+                <span style="color: #008b8b;">AngoloInferioreSinistro</span>: <span style="color: #228b22;">punto</span>{<span style="color: #008b8b;">x</span>: x0, <span style="color: #008b8b;">y</span>: y0}
+                <span style="color: #008b8b;">AngoloSuperioreDestro</span>: <span style="color: #228b22;">punto</span>{<span style="color: #008b8b;">x</span>: x1, <span style="color: #008b8b;">y</span>: y1}
                 }
         <span style="color: #b22222;">// </span><span style="color: #b22222;">Controlla se un automa &#232; nell'area proposta per l'ostacolo</span>
-        p.<span style="color: #0000ff;">isOstacoloSuPunto</span>(ostacolo) {
+        p.<span style="color: #0000ff;">isAutomaInOstacolo</span>(ostacolo) {
                 <span style="color: #a020f0;">return</span>
         }
 
@@ -447,9 +480,9 @@ Questa funzione è definita in modo che la sovrascrittura venga eseguita automat
 </div>
 </div>
 </div>
-<div id="outline-container-orgd921fd5" class="outline-4">
-<h4 id="orgd921fd5"><span class="section-number-4">1.4.6.</span> Richiamo</h4>
-<div class="outline-text-4" id="text-1-4-6">
+<div id="outline-container-orga65ec0c" class="outline-4">
+<h4 id="orga65ec0c"><span class="section-number-4">1.4.5.</span> Richiamo</h4>
+<div class="outline-text-4" id="text-1-4-5">
 <p>
 Prima mi creo delle funzioni per la distanza e per recuperare gli automi interessati.
 </p>
@@ -479,8 +512,17 @@ Poi creo una funzione che emette un richiamo e interpella tutti gli automi.
         <span style="color: #a020f0;">return</span> eta[:<span style="color: #483d8b;">len</span>(alpha)] == alpha
 }
 
+<span style="color: #a020f0;">func</span> (<span style="color: #a0522d;">p</span> *<span style="color: #228b22;">piano</span>) <span style="color: #0000ff;">filtraAutomiPerPrefisso</span>(<span style="color: #a0522d;">alpha</span> <span style="color: #228b22;">string</span>) []<span style="color: #228b22;">automa</span> {
+        <span style="color: #a0522d;">automiFiltrati</span> := <span style="color: #483d8b;">make</span>([]<span style="color: #228b22;">automa</span>, 0)
+        <span style="color: #a020f0;">for</span> <span style="color: #a0522d;">nome</span>, <span style="color: #a0522d;">automa</span> := p.automi {
+                <span style="color: #a020f0;">if</span> <span style="color: #0000ff;">isPrefisso</span>(alpha, nome) {
+                        automiFiltrati = <span style="color: #483d8b;">append</span>(automiFiltrati, automa)
+                }
+        }
+}
+
 <span style="color: #b22222;">// </span><span style="color: #b22222;">Richiamo emette un segnale dal punto (x,y)</span>
-<span style="color: #a020f0;">func</span> (<span style="color: #a0522d;">p</span> *<span style="color: #228b22;">piano</span>) <span style="color: #0000ff;">richiamo</span>(<span style="color: #a0522d;">x</span>, <span style="color: #a0522d;">y</span> <span style="color: #228b22;">int</span>, <span style="color: #a0522d;">alpha</span> <span style="color: #228b22;">string</span>) {
+<span style="color: #a020f0;">func</span> (<span style="color: #a0522d;">p</span> *<span style="color: #228b22;">piano</span>) <span style="color: #0000ff;">emettiRichiamo</span>(<span style="color: #a0522d;">x</span>, <span style="color: #a0522d;">y</span> <span style="color: #228b22;">int</span>, <span style="color: #a0522d;">alpha</span> <span style="color: #228b22;">string</span>) {
         <span style="color: #a0522d;">sorgente</span> := <span style="color: #228b22;">punto</span>{<span style="color: #008b8b;">X</span>: x, <span style="color: #008b8b;">Y</span>: y}
 
         <span style="color: #b22222;">// </span><span style="color: #b22222;">Se la sorgente &#232; in un ostacolo, nessun movimento possibile</span>
@@ -488,7 +530,7 @@ Poi creo una funzione che emette un richiamo e interpella tutti gli automi.
                 <span style="color: #a020f0;">return</span>
         }
 
-        <span style="color: #a020f0;">for</span> <span style="color: #a0522d;">_</span>, <span style="color: #a0522d;">aut</span> := <span style="color: #a020f0;">range</span> p.automa {
+        <span style="color: #a020f0;">for</span> <span style="color: #a0522d;">_</span>, <span style="color: #a0522d;">automa</span> := <span style="color: #a020f0;">range</span> <span style="color: #0000ff;">filtraAutomePerPrefisso</span>(p.automa) {
                 aut.<span style="color: #0000ff;">gestisciRichiamo</span>(sorgente)
         }
 }
@@ -505,27 +547,25 @@ In particolare, prima di aggiungere alla coda,
 }
 </pre>
 </div>
-
+</div>
+</div>
+<div id="outline-container-org5aa31e4" class="outline-4">
+<h4 id="org5aa31e4"><span class="section-number-4">1.4.6.</span> Posizioni</h4>
+<div class="outline-text-4" id="text-1-4-6">
 <div class="org-src-container">
 <pre class="src src-go"><span style="color: #b22222;">// </span><span style="color: #b22222;">Posizioni stampa le posizioni degli automi che corrispondono al prefisso</span>
-<span style="color: #a020f0;">func</span> (<span style="color: #a0522d;">p</span> *<span style="color: #228b22;">Piano</span>) <span style="color: #0000ff;">Posizioni</span>(<span style="color: #a0522d;">alpha</span> <span style="color: #228b22;">string</span>) {
-        <span style="color: #b22222;">// </span><span style="color: #b22222;">Ottieni automi corrispondenti ordinati per nome</span>
-        <span style="color: #a0522d;">corrispondenti</span> := <span style="color: #483d8b;">make</span>([]<span style="color: #228b22;">string</span>, 0)
-        <span style="color: #a020f0;">for</span> <span style="color: #a0522d;">nome</span> := <span style="color: #a020f0;">range</span> p.automa {
-                <span style="color: #a020f0;">if</span> <span style="color: #0000ff;">isPrefisso</span>(alpha, nome) {
-                        corrispondenti = <span style="color: #483d8b;">append</span>(corrispondenti, nome)
-                }
-        }
-        sort.<span style="color: #0000ff;">Strings</span>(corrispondenti)
-
-        <span style="color: #b22222;">// </span><span style="color: #b22222;">Stampa posizioni</span>
-        <span style="color: #a020f0;">for</span> <span style="color: #a0522d;">_</span>, <span style="color: #a0522d;">nome</span> := <span style="color: #a020f0;">range</span> corrispondenti {
-                <span style="color: #a0522d;">aut</span> := p.automa[nome]
-                fmt.<span style="color: #0000ff;">Printf</span>(<span style="color: #8b2252;">"%s %d %d\n"</span>, nome, aut.Posizione.X, aut.Posizione.Y)
-        }
+<span style="color: #a020f0;">func</span> (<span style="color: #a0522d;">p</span> *<span style="color: #228b22;">Piano</span>) <span style="color: #0000ff;">posizioni</span>(<span style="color: #a0522d;">alpha</span> <span style="color: #228b22;">string</span>) {
+        p.<span style="color: #0000ff;">stampaAutomi</span>(
 }
-
-<span style="color: #b22222;">// </span><span style="color: #b22222;">EsistePercorso controlla se esiste un percorso libero</span>
+</pre>
+</div>
+</div>
+</div>
+<div id="outline-container-org51d9a00" class="outline-4">
+<h4 id="org51d9a00"><span class="section-number-4">1.4.7.</span> Esiste Percorso</h4>
+<div class="outline-text-4" id="text-1-4-7">
+<div class="org-src-container">
+<pre class="src src-go"><span style="color: #b22222;">// </span><span style="color: #b22222;">EsistePercorso controlla se esiste un percorso libero</span>
 <span style="color: #a020f0;">func</span> (<span style="color: #a0522d;">p</span> *<span style="color: #228b22;">Piano</span>) <span style="color: #0000ff;">EsistePercorso</span>(<span style="color: #a0522d;">x</span>, <span style="color: #a0522d;">y</span> <span style="color: #228b22;">int</span>, <span style="color: #a0522d;">nome</span> <span style="color: #228b22;">string</span>) {
         <span style="color: #a0522d;">dest</span> := <span style="color: #228b22;">Punto</span>{<span style="color: #008b8b;">X</span>: x, <span style="color: #008b8b;">Y</span>: y}
 
@@ -553,7 +593,7 @@ In particolare, prima di aggiungere alla coda,
         <span style="color: #a0522d;">dx</span> := <span style="color: #0000ff;">segno</span>(a.X - da.X)
         <span style="color: #a0522d;">dy</span> := <span style="color: #0000ff;">segno</span>(a.Y - da.Y)
 
-        <span style="color: #a0522d;">corrente</span> := da
+        <span style="color: #b22222;">//</span><span style="color: #b22222;">corrente := da</span>
 
         <span style="color: #b22222;">// </span><span style="color: #b22222;">Prima tenta il movimento orizzontale</span>
         <span style="color: #a020f0;">for</span> corrente.X != a.X {
@@ -587,12 +627,88 @@ In particolare, prima di aggiungere alla coda,
 </div>
 </div>
 </div>
+<div id="outline-container-orga5797fc" class="outline-4">
+<h4 id="orga5797fc"><span class="section-number-4">1.4.8.</span> Utilities</h4>
+<div class="outline-text-4" id="text-1-4-8">
+<p>
+Innanzitutto definisco delle funzioni che mi torneranno utili in diverse occasioni.
+</p>
+<div class="org-src-container">
+<pre class="src src-go"><span style="color: #b22222;">// </span><span style="color: #b22222;">isPuntoInOstacolo controlla se un punto &#232; dentro un ostacolo</span>
+<span style="color: #a020f0;">func</span> (<span style="color: #a0522d;">p</span> *<span style="color: #228b22;">piano</span>) <span style="color: #0000ff;">isPuntoInOstacolo</span>(<span style="color: #a0522d;">punto</span> <span style="color: #228b22;">punto</span>) <span style="color: #228b22;">bool</span> {
+        <span style="color: #a020f0;">for</span> <span style="color: #a0522d;">_</span>, <span style="color: #a0522d;">ost</span> := <span style="color: #a020f0;">range</span> p.ostacoli {
+                <span style="color: #a020f0;">if</span> punto.x &gt;= ost.AngoloInferioreSinistro.x &amp;&amp; punto.x &lt;= ost.AngoloSuperioreDestro.x &amp;&amp;
+                        punto.y &gt;= ost.AngoloInferioreSinistro.y &amp;&amp; punto.y &lt;= ost.AngoloSuperioreDestro.y {
+                        <span style="color: #a020f0;">return</span> <span style="color: #008b8b;">true</span>
+                }
+        }
+        <span style="color: #a020f0;">return</span> <span style="color: #008b8b;">false</span>
+}
+
+<span style="color: #b22222;">// </span><span style="color: #b22222;">isPuntoUnAutoma checks if a point is an automaton</span>
+<span style="color: #a020f0;">func</span> (<span style="color: #a0522d;">p</span> *<span style="color: #228b22;">piano</span>) <span style="color: #0000ff;">isPuntoUnAutoma</span>(<span style="color: #a0522d;">punto</span> <span style="color: #228b22;">punto</span>) <span style="color: #228b22;">bool</span> {
+    <span style="color: #a020f0;">for</span> <span style="color: #a0522d;">_</span>, <span style="color: #a0522d;">aut</span> := <span style="color: #a020f0;">range</span> p.automati {
+        <span style="color: #a020f0;">if</span> aut.Posizione == punto {
+            <span style="color: #a020f0;">return</span> <span style="color: #008b8b;">true</span>
+        }
+    }
+    <span style="color: #a020f0;">return</span> <span style="color: #008b8b;">false</span>
+}
+
+<span style="color: #b22222;">// </span><span style="color: #b22222;">isAutomaInOstacolo checks if there is any automaton within the given obstacle</span>
+<span style="color: #a020f0;">func</span> (<span style="color: #a0522d;">p</span> *<span style="color: #228b22;">piano</span>) <span style="color: #0000ff;">isAutomaInOstacolo</span>(<span style="color: #a0522d;">ostacolo</span> <span style="color: #228b22;">ostacolo</span>) <span style="color: #228b22;">bool</span> {
+    <span style="color: #a020f0;">for</span> <span style="color: #a0522d;">_</span>, <span style="color: #a0522d;">aut</span> := <span style="color: #a020f0;">range</span> p.automi {
+        <span style="color: #a020f0;">if</span> aut.Posizione.X &gt;= ostacolo.BottomLeft.X &amp;&amp; aut.Posizione.X &lt;= ostacolo.TopRight.X &amp;&amp;
+            aut.Posizione.Y &gt;= ostacolo.BottomLeft.Y &amp;&amp; aut.Posizione.Y &lt;= ostacolo.TopRight.Y {
+            <span style="color: #a020f0;">return</span> <span style="color: #008b8b;">true</span>
+        }
+    }
+    <span style="color: #a020f0;">return</span> <span style="color: #008b8b;">false</span>
+}
+</pre>
+</div>
+</div>
+</div>
+</div>
+<div id="outline-container-org2bc60fe" class="outline-3">
+<h3 id="org2bc60fe"><span class="section-number-3">1.5.</span> Funzioni principali</h3>
+<div class="outline-text-3" id="text-1-5">
+</div>
+<div id="outline-container-org6b4cb02" class="outline-4">
+<h4 id="org6b4cb02"><span class="section-number-4">1.5.1.</span> Crea</h4>
+<div class="outline-text-4" id="text-1-5-1">
+<p>
+La creazione consiste nell'inizializzazione della <code>map</code> degli automi e della <code>slice</code> degli ostacoli.
+</p>
+
+<p>
+La funzione ritorna una struttura <code>piano</code> e non il suo puntatore per richiesta esplicita nella consegna.
+#+begin<sub>src</sub> go
+// newPiano crea un piano vuoto
+func newPiano() piano {
+	return piano{
+		automi:   make(map[string]*automa),
+		ostacoli: make([]*ostacolo, 0),
+	}
+}
+</p>
+</div>
+</div>
+<div id="outline-container-org9675eb1" class="outline-4">
+<h4 id="org9675eb1"><span class="section-number-4">1.5.2.</span> Esegui</h4>
+<div class="outline-text-4" id="text-1-5-2">
+<div class="org-src-container">
+<pre class="src src-go">
+</pre>
+</div>
+</div>
+</div>
 </div>
 </div>
 </div>
 <div id="postamble" class="status">
 <p class="author">Author: vjo</p>
-<p class="date">Created: 2025-01-13 Mon 17:35</p>
+<p class="date">Created: 2025-01-16 Thu 15:26</p>
 <p class="validation"><a href="https://validator.w3.org/check?uri=referer">Validate</a></p>
 </div>
 </body>
