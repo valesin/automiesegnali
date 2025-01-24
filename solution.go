@@ -26,7 +26,7 @@ type ostacolo struct {
 // piano rappresenta l'intero sistema
 type piano struct {
 	automi            map[string]automa
-	ostacoli          []ostacolo
+	ostacoli          *List[ostacolo]
 	daReinizializzare *bool
 }
 
@@ -39,9 +39,8 @@ func main() {
 			p = newPiano()
 			*p.daReinizializzare = false
 		}
-		fmt.Print("Enter command: ")
 		riga, _ := reader.ReadString('\n')
-		esegui(riga, p)
+		esegui(p, riga)
 	}
 }
 
@@ -52,7 +51,7 @@ func main() {
 func newPiano() piano {
 	return piano{
 		automi:            make(map[string]automa),
-		ostacoli:          make([]ostacolo, 0),
+		ostacoli:          NewList[ostacolo](),
 		daReinizializzare: new(bool),
 	}
 }
@@ -60,7 +59,7 @@ func newPiano() piano {
 // newPiano ends here
 
 // [[file:main.org::esegui][esegui]]
-func esegui(s string, p piano) {
+func esegui(p piano, s string) {
 	parti := strings.Fields(s)
 	comando := parti[0][0]
 
@@ -68,7 +67,8 @@ func esegui(s string, p piano) {
 	case 'c':
 		*p.daReinizializzare = true
 	case 'S':
-		p.stampaTutto()
+		p.stampaAutomi("")
+		p.stampaOstacoli()
 	case 's':
 		a, _ := strconv.Atoi(parti[1])
 		b, _ := strconv.Atoi(parti[2])
@@ -85,7 +85,10 @@ func esegui(s string, p piano) {
 		d, _ := strconv.Atoi(parti[4])
 		p.aggiungiOstacolo(a, b, c, d)
 	case 'r':
-
+		x, _ := strconv.Atoi(parti[1])
+		y, _ := strconv.Atoi(parti[2])
+		alpha := parti[3]
+		p.emettiRichiamo(x, y, alpha)
 	case 'p':
 		omega := parti[1]
 		p.stampaAutomi(omega)
@@ -108,13 +111,13 @@ func (p *piano) stampaStato(x, y int) {
 	punto := punto{x: x, y: y}
 
 	// Controlla se il punto è in un ostacolo
-	if p.verificaPuntoInOstacolo(punto) {
+	if p.isPuntoInQualcheOstacolo(punto) {
 		fmt.Println("O")
 		return
 	}
 
 	// Controlla se il punto contiene un automa
-	if p.verificaPuntoAutoma(punto) {
+	if p.isPuntoAutoma(punto) {
 		fmt.Println("A")
 		return
 	}
@@ -137,20 +140,16 @@ func (p *piano) stampaAutomi(filtro string) {
 }
 func (p *piano) stampaOstacoli() {
 	fmt.Println("[")
-	for _, ostacolo := range p.ostacoli {
+	current := p.ostacoli.Head
+	for current != nil {
 		fmt.Printf("(%v,%v)(%v,%v)\n",
-			ostacolo.angoloInferioreSinistro.x,
-			ostacolo.angoloInferioreSinistro.y,
-			ostacolo.angoloSuperioreDestro.x,
-			ostacolo.angoloSuperioreDestro.y)
+			current.Value.angoloInferioreSinistro.x,
+			current.Value.angoloInferioreSinistro.y,
+			current.Value.angoloSuperioreDestro.x,
+			current.Value.angoloSuperioreDestro.y)
+		current = current.Next
 	}
 	fmt.Println("]")
-}
-
-// Stampa stampaTutto le liste degli automi e degli ostacoli
-func (p *piano) stampaTutto() {
-	p.stampaAutomi("")
-	p.stampaOstacoli()
 }
 
 // Stampa:1 ends here
@@ -161,7 +160,7 @@ func (p *piano) aggiungiAutoma(x, y int, nome string) {
 	punto := punto{x: x, y: y}
 
 	// Controlla se il punto è in un ostacolo
-	if p.verificaPuntoInOstacolo(punto) {
+	if p.isPuntoInQualcheOstacolo(punto) {
 		return
 	}
 
@@ -184,12 +183,12 @@ func (p *piano) aggiungiOstacolo(x0, y0, x1, y1 int) {
 	}
 
 	// Controlla se un automa è nell'area proposta per l'ostacolo
-	if p.verificaAutomaInOstacolo(ostacolo) {
+	if p.isOstacoloSuQualchePunto(ostacolo) {
 		return
 	}
 
 	// Aggiungi ostacolo
-	p.ostacoli = append(p.ostacoli, ostacolo)
+	p.ostacoli.AddNewNode(ostacolo)
 }
 
 // Ostacolo:1 ends here
@@ -197,7 +196,7 @@ func (p *piano) aggiungiOstacolo(x0, y0, x1, y1 int) {
 // [[file:main.org::*Richiamo][Richiamo:1]]
 // Calcolo della calcolaDistanzaManhattan di Manhattan
 func calcolaDistanzaManhattan(a, b punto) int {
-	return valoreAssoluto(b.x-a.x) + valoreAssoluto(b.y-b.y)
+	return valoreAssoluto(b.x-a.x) + valoreAssoluto(b.y-a.y)
 }
 
 func valoreAssoluto(x int) int {
@@ -215,27 +214,17 @@ func verificaPrefisso(alpha, eta string) bool {
 	return eta[:len(alpha)] == alpha
 }
 
-func (p *piano) filtraAutomiPerPrefisso(alpha string) []automa {
-	automiFiltrati := make([]automa, 0)
-	for nome, automa := range p.automi {
-		if verificaPrefisso(alpha, nome) {
-			automiFiltrati = append(automiFiltrati, automa)
-		}
-	}
-	return automiFiltrati
-}
-
 // Richiamo emette un segnale dal punto (x,y)
 func (p *piano) emettiRichiamo(x, y int, alpha string) {
 	sorgente := punto{x: x, y: y}
 
 	// Se la sorgente è in un ostacolo, nessun movimento possibile
-	if p.verificaPuntoInOstacolo(sorgente) {
+	if p.isPuntoInQualcheOstacolo(sorgente) {
 		return
 	}
 
-	for _, automa := range p.filtraAutomiPerPrefisso(alpha) {
-		if p.esistePercorsoMinimoLibero(sorgente, automa) {
+	for nome, automa := range p.automi {
+		if verificaPrefisso(alpha, nome) && p.esistePercorsoMinimoLibero(sorgente, automa) {
 			automa.x = sorgente.x
 			automa.y = sorgente.y
 		}
@@ -243,11 +232,6 @@ func (p *piano) emettiRichiamo(x, y int, alpha string) {
 }
 
 // Richiamo:1 ends here
-
-// [[file:main.org::*Posizioni][Posizioni:1]]
-// Posizioni stampa le posizioni degli automi che corrispondono al prefisso
-
-// Posizioni:1 ends here
 
 // [[file:main.org::*Esiste Percorso][Esiste Percorso:1]]
 // EsistePercorso controlla se esiste un percorso libero
@@ -257,7 +241,8 @@ func (p *piano) stampaEsistenzaPercorso(x, y int, nome string) {
 	// Controlla se l'automa esiste e se la destinazione è valida
 	aut, esiste := p.automi[nome]
 
-	if !esiste || p.verificaPuntoInOstacolo(dest) {
+	if !esiste || p.isPuntoInQualcheOstacolo(dest) {
+		fmt.Println(!esiste, p.isPuntoInQualcheOstacolo(dest))
 		fmt.Println("NO")
 		return
 	}
@@ -299,17 +284,15 @@ func (p *piano) esistePercorsoMinimoLibero(aut automa, dest punto) bool {
 	direzioni := trovaPassiUnitariAmmessi(aut, dest)
 
 	// Initialize queue with the starting point
-	queue := []punto{aut}
+	var queue Queue[punto]
 
-	for len(queue) > 0 {
-		current := queue[0]
-		queue = queue[1:]
+	queue.Push(aut)
 
-		// If we've reached the end point, a shortest path exists
+	for current, ok := queue.Pop(); ok; current, ok = queue.Pop() {
+
 		if current == dest {
 			return true
 		}
-
 		// Explore neighbors using the directions vector
 		for _, dir := range direzioni {
 			prossimoPunto := punto{
@@ -317,8 +300,8 @@ func (p *piano) esistePercorsoMinimoLibero(aut automa, dest punto) bool {
 				y: current.y + dir[1],
 			}
 
-			if calcolaDistanzaManhattan(prossimoPunto, dest) < calcolaDistanzaManhattan(current, dest) && p.verificaPuntoInOstacolo(prossimoPunto) {
-				queue = append(queue, prossimoPunto)
+			if calcolaDistanzaManhattan(prossimoPunto, dest) < calcolaDistanzaManhattan(current, dest) && !p.isPuntoInQualcheOstacolo(prossimoPunto) {
+				queue.Push(prossimoPunto)
 			}
 		}
 	}
@@ -330,19 +313,20 @@ func (p *piano) esistePercorsoMinimoLibero(aut automa, dest punto) bool {
 // Esiste Percorso:1 ends here
 
 // [[id:4805c5fe-d8e8-4cad-a8bb-0ed6bce1c769][Utilities:1]]
-// verificaPuntoInOstacolo controlla se un punto è dentro un ostacolo
-func (p *piano) verificaPuntoInOstacolo(punto punto) bool {
-	for _, ost := range p.ostacoli {
-		if punto.x >= ost.angoloInferioreSinistro.x && punto.x <= ost.angoloSuperioreDestro.x &&
-			punto.y >= ost.angoloInferioreSinistro.y && punto.y <= ost.angoloSuperioreDestro.y {
+// isPuntoInQualcheOstacolo controlla se un punto è dentro un ostacolo
+func (p *piano) isPuntoInQualcheOstacolo(punto punto) bool {
+	current := p.ostacoli.Head
+	for current != nil {
+		if isPuntoInOstacolo(punto, current.Value) {
 			return true
 		}
+		current = current.Next
 	}
 	return false
 }
 
-// verificaPuntoAutoma checks if a point is an automaton
-func (p *piano) verificaPuntoAutoma(punto punto) bool {
+// isPuntoAutoma checks if a point is an automaton
+func (p *piano) isPuntoAutoma(punto punto) bool {
 	for _, aut := range p.automi {
 		if aut == punto {
 			return true
@@ -351,15 +335,21 @@ func (p *piano) verificaPuntoAutoma(punto punto) bool {
 	return false
 }
 
-// verificaAutomaInOstacolo checks if there is any automaton within the given obstacle
-func (p *piano) verificaAutomaInOstacolo(ostacolo ostacolo) bool {
+// isOstacoloSuQualchePunto checks if there is any automaton within the given obstacle
+func (p *piano) isOstacoloSuQualchePunto(ostacolo ostacolo) bool {
 	for _, aut := range p.automi {
-		if aut.x >= ostacolo.angoloInferioreSinistro.x && aut.x <= ostacolo.angoloSuperioreDestro.x &&
-			aut.y >= ostacolo.angoloInferioreSinistro.y && aut.y <= ostacolo.angoloSuperioreDestro.y {
+		if isPuntoInOstacolo(aut, ostacolo) {
 			return true
 		}
 	}
 	return false
+}
+
+func isPuntoInOstacolo(p punto, o ostacolo) bool {
+	return p.x >= o.angoloInferioreSinistro.x &&
+		p.x <= o.angoloSuperioreDestro.x &&
+		p.y >= o.angoloInferioreSinistro.y &&
+		p.y <= o.angoloSuperioreDestro.y
 }
 
 // Utilities:1 ends here

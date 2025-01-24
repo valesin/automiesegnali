@@ -1,12 +1,27 @@
 #+PROPERTY: header-args:go :main no :noweb yes :exports code :tangle yes :package 'discard :comments 'link startup: overview
+#+OPTIONS: num:3
+#+latex_class: article
+#+latex_class_options:
+#+latex_header:
+#+latex_header_extra:
+#+description:
+#+keywords:
+#+subtitle:
+#+latex_footnote_command: \footnote{%s%s}
+#+latex_engraved_theme:
+#+latex_compiler: pdflatex
+#+date: \today
 * Automi e segnali
+
+Questo documento descrive un sistema di simulazione basato su automi (rappresentati come punti in una griglia 2D) e ostacoli rettangolari all’interno di tale griglia. L’interazione avviene tramite un’interfaccia a riga di comando che consente di aggiungere o rimuovere automi, inserire ostacoli e verificare percorsi liberi.
+
+Il concetto chiave è che gli automi si trovano su un “piano” (o griglia potenzialmente infinita) ma, per ragioni di implementazione, consideriamo solo le posizioni effettivamente utilizzate. Questo approccio evita la necessità di gestire strutture estremamente grandi o di creare array 2D di dimensioni elevate. 
 ** TODO crea un vero stack
+
+** Analisi del problema
+
 ** Backbone
-Di conseguenza, la struttura fondamentale è questa.
-
-Non uso librerie esterne.
-
-Blablabla.
+La sezione che segue illustra la struttura fondamentale del programma in Go. Non vengono utilizzate librerie esterne, confidando unicamente nel package standard di Go. Tutto il codice (organizzato qui sotto) costituisce la “spina dorsale” del sistema.
 #+begin_src go
 package main
 
@@ -35,7 +50,7 @@ type ostacolo struct {
 // piano rappresenta l'intero sistema
 type piano struct {
 	automi            map[string]automa
-	ostacoli          []ostacolo
+	ostacoli          *[]ostacolo
 	daReinizializzare *bool
 }
 
@@ -48,24 +63,63 @@ func main() {
 			p = newPiano()
 			*p.daReinizializzare = false
 		}
-		fmt.Print("Enter command: ")
 		riga, _ := reader.ReadString('\n')
-		esegui(riga, p)
+		esegui(p, riga)
 	}
 }
 #+end_src
+
+In questo frammento, la funzione main() crea un nuovo \verb|piano| (tramite newPiano()) all’avvio, quindi legge i comandi in un loop continuo. Se la variabile booleana daReinizializzare risulta vera, l’intero piano viene re-inizializzato per ripristinare lo stato del sistema a condizioni di partenza.
+
 ** Spiegazione e analisi del problema
-Il problema viene formalizzato in questo modo bla bla bla.
 
-Per questo motivo, considero che sia una buona scelta quella di considerare gli automi come punti su un grafo infinito di cui però non viene rappresentato ogni nodo.
+Il problema affrontato dal programma è quello di collocare uno o più automi in una griglia 2D, soggetta alla presenza di ostacoli. È altresì necessario consentire all’utente di:
+- Aggiungere e/o spostare automi.
+- Inserire ostacoli rettangolari.
+- Controllare lo stato di un punto (se occupato da un automa, ostruito da un ostacolo o vuoto).
+- Verificare se esiste un percorso minimo libero da ostacoli tra due punti specifici per un automa specifico. 
 
-Infatti, i nodi e i cammini sono impliciti nella definizione, quindi utilizzerò soltanto una rappresentazione per i nodi realmente utilizzati.
+L’idea di fondo è di ridurre ai minimi termini la rappresentazione mantenuta in memoria. Questo significa non modellare l’intero piano in modo esplicito, ma salvare soltanto le posizioni effettive (automi collocati) e i dettagli delle aree rettangolari che compongono gli ostacoli.
+
+____________________
+
+Il problema consiste nel gestire un piano 2D (potenzialmente illimitato) con un insieme di automi e ostacoli. Ogni cella del piano è caratterizzata da:
+
+    La possibile presenza di un automa.
+    L’inclusione in uno (o più) ostacoli rettangolari.
+    Essere vuota.
+
+L’interfaccia testuale permette all’utente di:
+
+    Inserire, rimuovere, o spostare automi (identificati da un nome).
+    Inserire ostacoli rettangolari.
+    Verificare percorsi liberi usando una tecnica di \emph{ricerca} (discussa nella sezione dedicata).
+    Stampare lo stato di un singolo punto o di tutti gli oggetti presenti.
+
+Dal punto di vista della complessità, la struttura dati centrale è costituita da:
+
+    Una \verb|map[string]automa| per memorizzare i nomi degli automi e le loro coordinate.
+    Una slice di ostacoli, ciascuno definito da due punti.
+
+Questa scelta offre un buon compromesso tra semplicità e immediatezza:
+
+    Gli accessi alla mappa (\verb|automi|) avvengono in (\mathbf{O}(1)) \emph{amortizzato} per l’inserimento, la ricerca e l’aggiornamento.
+    L’inserimento degli ostacoli in una slice ha complessità (\mathbf{O}(1)) \emph{amortizzato}.
+
+La verifica dell’esistenza di un automa in un punto deve iterare sulla mappa se ci fosse necessità di scorrere tutti i valore; tuttavia, la maggior parte delle funzioni (e.g., \verb|esegui|) individua un automa direttamente per nome, riducendo quindi il costo a (\mathbf{O}(1)). Viceversa, controllare se un punto sia in un ostacolo richiede (\mathbf{O}(n)) dove (n) è il numero di ostacoli, giacché occorre verificare ogni rettangolo per vedere se contiene il punto.
+
+Dal punto di vista \emph{spaziale}, i principali costi di memoria risiedono nei container \verb|map| e \verb|slice|, che crescono a seconda del numero di automi e ostacoli.
 *** Definizioni
-Ogni punto è rappresentato da una coppia di interi.
+
+Ogni punto è un semplice contenitore di coordinate intere $(x, y)$.
+
+Un automa (alias di \verb|punto|) è un’entità che può muoversi all’interno del piano e occupa sempre *un solo* punto, per cui 
+
+Un ostacolo è definito da un angolo inferiore sinistro e un angolo superiore destro, entrambi di tipo \verb|punto|.
+
+L’oggetto \verb|piano| gestisce tutte queste informazioni in un unico luogo.
 
 Scelgo di rappresentare attraverso =int= e non =uint= perchè di fronte al vantaggio di un bit in più per la codifica, si avrebbe uno svantaggio nella chiarezza del codice, in quanto sarebbero necessarie molteplici conversioni, ad esempio ogni volta che viene effettuata un operazione che potrebbe temporaneamente utilizzare dei valori negativi.
-
-RIEMPIDOPO
 
 decido di usare una variabile daCancellare perchè per la segnatura delle funzioni, era necessario che usassi o un tipo wrapper intorno piano, così che in realtà esso fosse un puntatore, o una variabile globale, poco elegante.
 
@@ -78,7 +132,8 @@ quindi va bene così e la cancellazione avviene nel main
 ** Implementazione
 *** Funzioni richieste
 **** Crea
-La creazione consiste nell'inizializzazione della =map= degli automi e della =slice= degli ostacoli.
+
+La funzione newPiano inizializza un \verb|piano| vuoto, creando la mappa di automi e la slice di ostacoli. Inoltre, alloca la variabile booleana daReinizializzare usata per azzerare il piano se richiesto dall’utente.
 
 La funzione ritorna una struttura =piano= e non il suo puntatore per richiesta esplicita nella consegna.
 #+name: newPiano
@@ -87,16 +142,18 @@ La funzione ritorna una struttura =piano= e non il suo puntatore per richiesta e
 func newPiano() piano {
 	return piano{
 		automi:            make(map[string]automa),
-		ostacoli:          make([]ostacolo, 0),
+		ostacoli:          new([]ostacolo),
 		daReinizializzare: new(bool),
 	}
 }
 #+end_src
 **** Esegui
-L'esecuzione consiste in uno switch bla bla
+La funzione esegui prende in ingresso una stringa comando e il \verb|piano| corrente, quindi analizza le varie opzioni (create, stampa, aggiunta automa, ecc.) e chiama le funzioni corrispondenti.
+
+Non tutte le operazioni sono eseguite mediante una funzione dedicata. 
 #+name: esegui
 #+begin_src go
-func esegui(s string, p piano) {
+func esegui(p piano, s string) {
 	parti := strings.Fields(s)
 	comando := parti[0][0]
 
@@ -104,7 +161,8 @@ func esegui(s string, p piano) {
 	case 'c':
 		*p.daReinizializzare = true
 	case 'S':
-		p.stampaTutto()
+		p.stampaAutomi("")
+		p.stampaOstacoli()
 	case 's':
 		a, _ := strconv.Atoi(parti[1])
 		b, _ := strconv.Atoi(parti[2])
@@ -121,7 +179,10 @@ func esegui(s string, p piano) {
 		d, _ := strconv.Atoi(parti[4])
 		p.aggiungiOstacolo(a, b, c, d)
 	case 'r':
-
+		x, _ := strconv.Atoi(parti[1])
+		y, _ := strconv.Atoi(parti[2])
+		alpha := parti[3]
+		p.emettiRichiamo(x, y, alpha)
 	case 'p':
 		omega := parti[1]
 		p.stampaAutomi(omega)
@@ -145,13 +206,13 @@ func (p *piano) stampaStato(x, y int) {
 	punto := punto{x: x, y: y}
 
 	// Controlla se il punto è in un ostacolo
-	if p.verificaPuntoInOstacolo(punto) {
+	if p.isPuntoInQualcheOstacolo(punto) {
 		fmt.Println("O")
 		return
 	}
 
 	// Controlla se il punto contiene un automa
-	if p.verificaPuntoAutoma(punto) {
+	if p.isPuntoAutoma(punto) {
 		fmt.Println("A")
 		return
 	}
@@ -160,10 +221,8 @@ func (p *piano) stampaStato(x, y int) {
 	fmt.Println("E")
 }
 #+end_src
-
-Le operazioni necessarie all'interno dello switch sono le seguenti
 **** Stampa
-La funzione di stampa
+Le funzioni di stampa (stampaAutomi e stampaOstacoli) forniscono una panoramica rapida dello stato del piano, elencando rispettivamente automi e ostacoli.
 #+begin_src go
 func (p *piano) stampaAutomi(filtro string) {
 	fmt.Println("(")
@@ -176,7 +235,7 @@ func (p *piano) stampaAutomi(filtro string) {
 }
 func (p *piano) stampaOstacoli() {
 	fmt.Println("[")
-	for _, ostacolo := range p.ostacoli {
+	for _, ostacolo := range *p.ostacoli {
 		fmt.Printf("(%v,%v)(%v,%v)\n",
 			ostacolo.angoloInferioreSinistro.x,
 			ostacolo.angoloInferioreSinistro.y,
@@ -185,14 +244,10 @@ func (p *piano) stampaOstacoli() {
 	}
 	fmt.Println("]")
 }
-
-// Stampa stampaTutto le liste degli automi e degli ostacoli
-func (p *piano) stampaTutto() {
-	p.stampaAutomi("")
-	p.stampaOstacoli()
-}
 #+end_src
 **** Automa
+La funzione aggiungiAutoma permette di aggiungere un automa (o spostarlo) nella posizione specificata, a condizione che quel punto non sia coperto da ostacoli.
+
 Questa funzione è definita in modo che la sovrascrittura venga eseguita automaticamente sovrascrivendo il contenuto della mappa.
 #+name: automa
 #+begin_src go
@@ -201,7 +256,7 @@ func (p *piano) aggiungiAutoma(x, y int, nome string) {
 	punto := punto{x: x, y: y}
 
 	// Controlla se il punto è in un ostacolo
-	if p.verificaPuntoInOstacolo(punto) {
+	if p.isPuntoInQualcheOstacolo(punto) {
 		return
 	}
 
@@ -213,6 +268,7 @@ func (p *piano) aggiungiAutoma(x, y int, nome string) {
 }
 #+end_src
 **** Ostacolo
+La funzione aggiungiOstacolo inserisce un rettangolo che definisce un ostacolo, se non ci sono automi già presenti in quell’area.
 #+begin_src go
 // Ostacolo aggiunge un ostacolo se possibile
 func (p *piano) aggiungiOstacolo(x0, y0, x1, y1 int) {
@@ -223,15 +279,16 @@ func (p *piano) aggiungiOstacolo(x0, y0, x1, y1 int) {
 	}
 
 	// Controlla se un automa è nell'area proposta per l'ostacolo
-	if p.verificaAutomaInOstacolo(ostacolo) {
+	if p.isOstacoloSuQualchePunto(ostacolo) {
 		return
 	}
 
 	// Aggiungi ostacolo
-	p.ostacoli = append(p.ostacoli, ostacolo)
+	*p.ostacoli = append(*p.ostacoli, ostacolo)
 }
 #+end_src
 **** Richiamo
+
 Prima mi creo delle funzioni per la distanza e per recuperare gli automi interessati.
 
 Poi creo una funzione che emette un richiamo e interpella tutti gli automi.
@@ -239,7 +296,7 @@ Poi creo una funzione che emette un richiamo e interpella tutti gli automi.
 #+begin_src go
 // Calcolo della calcolaDistanzaManhattan di Manhattan
 func calcolaDistanzaManhattan(a, b punto) int {
-	return valoreAssoluto(b.x-a.x) + valoreAssoluto(b.y-b.y)
+	return valoreAssoluto(b.x-a.x) + valoreAssoluto(b.y-a.y)
 }
 
 func valoreAssoluto(x int) int {
@@ -257,36 +314,22 @@ func verificaPrefisso(alpha, eta string) bool {
 	return eta[:len(alpha)] == alpha
 }
 
-func (p *piano) filtraAutomiPerPrefisso(alpha string) []automa {
-	automiFiltrati := make([]automa, 0)
-	for nome, automa := range p.automi {
-		if verificaPrefisso(alpha, nome) {
-			automiFiltrati = append(automiFiltrati, automa)
-		}
-	}
-	return automiFiltrati
-}
-
 // Richiamo emette un segnale dal punto (x,y)
 func (p *piano) emettiRichiamo(x, y int, alpha string) {
 	sorgente := punto{x: x, y: y}
 
 	// Se la sorgente è in un ostacolo, nessun movimento possibile
-	if p.verificaPuntoInOstacolo(sorgente) {
+	if p.isPuntoInQualcheOstacolo(sorgente) {
 		return
 	}
 
-	for _, automa := range p.filtraAutomiPerPrefisso(alpha) {
-		if p.esistePercorsoMinimoLibero(sorgente, automa) {
+	for nome, automa := range p.automi {
+		if verificaPrefisso(alpha, nome) && p.esistePercorsoMinimoLibero(sorgente, automa) {
 			automa.x = sorgente.x
 			automa.y = sorgente.y
 		}
 	}
 }
-#+end_src
-**** Posizioni
-#+begin_src go
-// Posizioni stampa le posizioni degli automi che corrispondono al prefisso
 #+end_src
 **** Esiste Percorso
 #+begin_src go
@@ -297,7 +340,8 @@ func (p *piano) stampaEsistenzaPercorso(x, y int, nome string) {
 	// Controlla se l'automa esiste e se la destinazione è valida
 	aut, esiste := p.automi[nome]
 
-	if !esiste || p.verificaPuntoInOstacolo(dest) {
+	if !esiste || p.isPuntoInQualcheOstacolo(dest) {
+		fmt.Println(!esiste, p.isPuntoInQualcheOstacolo(dest))
 		fmt.Println("NO")
 		return
 	}
@@ -349,7 +393,6 @@ func (p *piano) esistePercorsoMinimoLibero(aut automa, dest punto) bool {
 		if current == dest {
 			return true
 		}
-
 		// Explore neighbors using the directions vector
 		for _, dir := range direzioni {
 			prossimoPunto := punto{
@@ -357,7 +400,7 @@ func (p *piano) esistePercorsoMinimoLibero(aut automa, dest punto) bool {
 				y: current.y + dir[1],
 			}
 
-			if calcolaDistanzaManhattan(prossimoPunto, dest) < calcolaDistanzaManhattan(current, dest) && p.verificaPuntoInOstacolo(prossimoPunto) {
+			if calcolaDistanzaManhattan(prossimoPunto, dest) < calcolaDistanzaManhattan(current, dest) && !p.isPuntoInQualcheOstacolo(prossimoPunto) {
 				queue = append(queue, prossimoPunto)
 			}
 		}
@@ -372,21 +415,20 @@ func (p *piano) esistePercorsoMinimoLibero(aut automa, dest punto) bool {
 :PROPERTIES:
 :ID:       4805c5fe-d8e8-4cad-a8bb-0ed6bce1c769
 :END:
-Innanzitutto definisco delle funzioni che mi torneranno utili in diverse occasioni.
+Queste funzioni di supporto riducono la complessità di altre porzioni del codice. In particolare, la facilità di verifica su ostacoli e automi consente di mantenere un flusso di esecuzione lineare nel resto delle funzioni (ad esempio, impedire l’aggiunta di un ostacolo laddove già si trovi un automa).
 #+begin_src go
-// verificaPuntoInOstacolo controlla se un punto è dentro un ostacolo
-func (p *piano) verificaPuntoInOstacolo(punto punto) bool {
-	for _, ost := range p.ostacoli {
-		if punto.x >= ost.angoloInferioreSinistro.x && punto.x <= ost.angoloSuperioreDestro.x &&
-			punto.y >= ost.angoloInferioreSinistro.y && punto.y <= ost.angoloSuperioreDestro.y {
+// isPuntoInQualcheOstacolo controlla se un punto è dentro un ostacolo
+func (p *piano) isPuntoInQualcheOstacolo(punto punto) bool {
+	for _, ost := range *p.ostacoli {
+		if isPuntoInOstacolo(punto, ost) {
 			return true
 		}
 	}
 	return false
 }
 
-// verificaPuntoAutoma checks if a point is an automaton
-func (p *piano) verificaPuntoAutoma(punto punto) bool {
+// isPuntoAutoma checks if a point is an automaton
+func (p *piano) isPuntoAutoma(punto punto) bool {
 	for _, aut := range p.automi {
 		if aut == punto {
 			return true
@@ -395,14 +437,20 @@ func (p *piano) verificaPuntoAutoma(punto punto) bool {
 	return false
 }
 
-// verificaAutomaInOstacolo checks if there is any automaton within the given obstacle
-func (p *piano) verificaAutomaInOstacolo(ostacolo ostacolo) bool {
+// isOstacoloSuQualchePunto checks if there is any automaton within the given obstacle
+func (p *piano) isOstacoloSuQualchePunto(ostacolo ostacolo) bool {
 	for _, aut := range p.automi {
-		if aut.x >= ostacolo.angoloInferioreSinistro.x && aut.x <= ostacolo.angoloSuperioreDestro.x &&
-			aut.y >= ostacolo.angoloInferioreSinistro.y && aut.y <= ostacolo.angoloSuperioreDestro.y {
+		if isPuntoInOstacolo(aut, ostacolo) {
 			return true
 		}
 	}
 	return false
+}
+
+func isPuntoInOstacolo(p punto, o ostacolo) bool {
+	return p.x >= o.angoloInferioreSinistro.x &&
+		p.x <= o.angoloSuperioreDestro.x &&
+		p.y >= o.angoloInferioreSinistro.y &&
+		p.y <= o.angoloSuperioreDestro.y
 }
 #+end_src

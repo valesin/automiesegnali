@@ -1,3 +1,3 @@
-module automi
+module solution
 
 go 1.22.10
