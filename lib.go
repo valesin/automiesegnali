@@ -6,63 +6,76 @@ type Node[T any] struct {
 	Next  *Node[T]
 }
 
-// Queue represents a generic queue
-type Queue[T any] struct {
-	Front *Node[T]
+// container holds minimal push/pop operations that both the queue and list can reuse.
+type container[T any] struct {
+	head *Node[T]
+	tail *Node[T]
 }
 
-// Push adds an element to the front of the queue
-func (q *Queue[T]) Push(value T) {
+// aggiungiInCoda adds a new element at the tail.
+func (c *container[T]) aggiungiInCoda(value T) {
 	newNode := &Node[T]{Value: value}
-	if q.Front == nil {
-		q.Front = newNode
-		return
+	if c.tail == nil {
+		// container is empty, so head and tail both point to the new node.
+		c.head = newNode
+		c.tail = newNode
+	} else {
+		// Insert at the tail in O(1).
+		c.tail.Next = newNode
+		c.tail = newNode
 	}
-	current := q.Front
-	for current.Next != nil {
-		current = current.Next
-	}
-	current.Next = newNode
 }
 
-// Pop removes and returns the front element from the queue
-// Returns zero value and false if queue is empty
-func (q *Queue[T]) Pop() (T, bool) {
-	if q.Front == nil {
+// cancellaInTesta removes an element from the head.
+func (c *container[T]) cancellaInTesta() (T, bool) {
+	if c.head == nil {
 		var zero T
-		return zero, false
+		return zero, false // Empty container
 	}
-	value := q.Front.Value
-	q.Front = q.Front.Next
-	return value, true
+	val := c.head.Value
+	c.head = c.head.Next
+	if c.head == nil {
+		// If the container becomes empty, tail should also be nil.
+		c.tail = nil
+	}
+	return val, true
 }
 
-// List represents a generic linked list
-type List[T any] struct {
-	Head *Node[T]
+// Queue embeds container and provides Enqueue/Dequeue methods.
+type Queue[T any] struct {
+	container[T]
 }
 
-// NewList returns a new empty list
-func NewList[T any]() *List[T] {
-	return &List[T]{
-		Head: nil,
-	}
+// Enqueue is a public-facing method that calls the shared push logic.
+func (q *Queue[T]) Enqueue(value T) {
+	q.aggiungiInCoda(value)
 }
 
-func newNode[T any](val T) *Node[T] {
-	return &Node[T]{Value: val, Next: nil}
+// Dequeue is a public-facing method that calls the shared pop logic.
+func (q *Queue[T]) Dequeue() (T, bool) {
+	return q.cancellaInTesta()
 }
 
-// AddNewNode adds a new node at the end of the list
-func (l *List[T]) AddNewNode(val T) {
-	node := newNode(val)
-	if l.Head == nil {
-		l.Head = node
-		return
-	}
-	current := l.Head
-	for current.Next != nil {
-		current = current.Next
-	}
-	current.Next = node
+// LinkedList embeds container for Add/Remove methods (or other list-specific logic).
+type LinkedList[T any] struct {
+	container[T]
 }
+
+// Add adds a node at the end, but you could easily change it to insert at the front.
+func (ll *LinkedList[T]) Add(value T) {
+	ll.aggiungiInCoda(value)
+}
+
+// Below is one possible approach to reduce code repetition while still exposing both a “linked list” interface and a “queue” interface. You can define a shared container that handles the low-level node operations, then embed that container in your specialized types. This way, the underlying logic lives in just one place, while the separate types each provide clarity to anyone reading or using the code.
+//Explanation:
+//• container[T] centralizes common operations (push/pop).
+//• Queue[T] and LinkedList[T] embed container[T], directly reusing the logic without additional code.
+//• Each specialized type uses different method names (like Enqueue/Dequeue vs. Add/Remove) to clarify intent.
+// Decido di inserire in coda e togliere dalla testa, sia per mantenere coerenza con l'ordine di inserimento che per evitare di dover scorrere tutta la lista per inserire in coda.
+// La roba che faccio si chiama embedding, e mi permette di riutilizzare codice senza doverlo riscrivere
+// This works because of Go's struct embedding feature. When LinkedList embeds container, all the fields and methods of container are automatically promoted to LinkedList. This means:
+
+//LinkedList inherits all fields from container
+//You can access head directly through LinkedList without mentioning container
+//Go treats it as if head was directly declared in LinkedList
+// Quindi posso accedere a head direttamente da LinkedList senza dover menzionare container

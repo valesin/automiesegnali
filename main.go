@@ -26,7 +26,7 @@ type ostacolo struct {
 // piano rappresenta l'intero sistema
 type piano struct {
 	automi            map[string]automa
-	ostacoli          *List[ostacolo]
+	ostacoli          *LinkedList[ostacolo]
 	daReinizializzare *bool
 }
 
@@ -51,7 +51,7 @@ func main() {
 func newPiano() piano {
 	return piano{
 		automi:            make(map[string]automa),
-		ostacoli:          NewList[ostacolo](),
+		ostacoli:          &LinkedList[ostacolo]{},
 		daReinizializzare: new(bool),
 	}
 }
@@ -140,7 +140,7 @@ func (p *piano) stampaAutomi(filtro string) {
 }
 func (p *piano) stampaOstacoli() {
 	fmt.Println("[")
-	current := p.ostacoli.Head
+	current := p.ostacoli.head
 	for current != nil {
 		fmt.Printf("(%v,%v)(%v,%v)\n",
 			current.Value.angoloInferioreSinistro.x,
@@ -188,7 +188,7 @@ func (p *piano) aggiungiOstacolo(x0, y0, x1, y1 int) {
 	}
 
 	// Aggiungi ostacolo
-	p.ostacoli.AddNewNode(ostacolo)
+	p.ostacoli.Add(ostacolo)
 }
 
 // Ostacolo:1 ends here
@@ -286,9 +286,9 @@ func (p *piano) esistePercorsoMinimoLibero(aut automa, dest punto) bool {
 	// Initialize queue with the starting point
 	var queue Queue[punto]
 
-	queue.Push(aut)
+	queue.Enqueue(aut)
 
-	for current, ok := queue.Pop(); ok; current, ok = queue.Pop() {
+	for current, ok := queue.Dequeue(); ok; current, ok = queue.Dequeue() {
 
 		if current == dest {
 			return true
@@ -301,7 +301,7 @@ func (p *piano) esistePercorsoMinimoLibero(aut automa, dest punto) bool {
 			}
 
 			if calcolaDistanzaManhattan(prossimoPunto, dest) < calcolaDistanzaManhattan(current, dest) && !p.isPuntoInQualcheOstacolo(prossimoPunto) {
-				queue.Push(prossimoPunto)
+				queue.Enqueue(prossimoPunto)
 			}
 		}
 	}
@@ -315,7 +315,7 @@ func (p *piano) esistePercorsoMinimoLibero(aut automa, dest punto) bool {
 // [[id:4805c5fe-d8e8-4cad-a8bb-0ed6bce1c769][Utilities:1]]
 // isPuntoInQualcheOstacolo controlla se un punto è dentro un ostacolo
 func (p *piano) isPuntoInQualcheOstacolo(punto punto) bool {
-	current := p.ostacoli.Head
+	current := p.ostacoli.head
 	for current != nil {
 		if isPuntoInOstacolo(punto, current.Value) {
 			return true
