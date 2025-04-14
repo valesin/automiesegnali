@@ -117,7 +117,7 @@ Un automa (alias di \verb|punto|) è un’entità che può muoversi all’intern
 
 Un ostacolo è definito da un angolo inferiore sinistro e un angolo superiore destro, entrambi di tipo \verb|punto|.
 
-L’oggetto \verb|piano| gestisce tutte queste informazioni in un unico luogo.
+L’oggetto $\verb|piano|$ gestisce tutte queste informazioni in un unico luogo.
 
 Scelgo di rappresentare attraverso =int= e non =uint= perchè di fronte al vantaggio di un bit in più per la codifica, si avrebbe uno svantaggio nella chiarezza del codice, in quanto sarebbero necessarie molteplici conversioni, ad esempio ogni volta che viene effettuata un operazione che potrebbe temporaneamente utilizzare dei valori negativi.
 
