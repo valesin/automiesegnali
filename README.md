@@ -1,63 +1,54 @@
 # automiesegnali
 
-The problem involves:
+## Overview
 
-    Studying the movement of point-like automata on uneven terrain that are sensitive to signals attracting them to certain locations.
-    Working on a plane defined as a set of points with integer coordinates: {(x, y) ∈ Z × Z}
-    Defining movements in terms of:
-        Horizontal unit steps: segments connecting points (x, y) and (x + 1, y)
-        Vertical unit steps: segments connecting points (x, y) and (x, y + 1)
-    A path is defined as a sequence S = p1, p2, ..., pk of k horizontal and/or vertical unit steps where:
-        Consecutive steps share only one vertex
-        No point is common to more than two unit steps
-        The length of S is k
-    The distance D(A, B) between two points A and B is defined as the minimum length of paths connecting them
-    For points A(xA, yA) and B(xB, yB), the distance is calculated as:
-    D(A, B) = |xB - xA| + |yB - yA|
+The project `automiesegnali` studies the movement of point-like automata on uneven terrain, which are sensitive to signals attracting them to specific locations. It operates on a discrete grid plane defined by integer coordinates, employing a Manhattan distance metric for pathfinding and movement rules.
 
-This is essentially describing a Manhattan distance (or L1 distance) metric on a discrete grid.
+Key features include:
+- Automata uniquely identified by binary strings.
+- Obstacles defined as rectangular regions that limit movement.
+- Signals emitted by sources to attract automata based on prefix matching.
+- Movement algorithms ensuring only automata with minimum distance and free paths respond to signals.
 
-Key points about the automata:
+This project integrates mathematical modeling, algorithmic design, and discrete geometry to explore automata behavior in constrained environments.
 
-    Each automaton is uniquely identified by a name η (eta)
-    The name η is a finite string over the alphabet {0, 1}
-        η = b1b2...bn where n is a positive integer
-        Each bi ∈ {0, 1} for i ∈ {1, ..., n}
-    The position P(η) of an automaton at any given time is specified by coordinates (x0, y0) ∈ Z × Z
-    Multiple automata can occupy the same point on the plane
+---
 
-Key points about obstacles:
+## Literate Programming
 
-    Obstacles are present in the plane and limit the movement of automata
-    Each obstacle is defined as a set of points contained within a rectangle with vertical and horizontal sides
-    A rectangle is denoted as R(x0, y0, x1, y1) where:
-        (x0, y0) are coordinates of the bottom-left vertex
-        (x1, y1) are coordinates of the top-right vertex
-        All coordinates are integers
-    Important rules:
-        Obstacles can overlap
-        No automaton can be positioned on any point belonging to an obstacle
-        A path is considered "free" if it doesn't intersect with any obstacles
+This project employs **Literate Programming**, an innovative programming paradigm introduced by Donald E. Knuth in his seminal work *Literate Programming* (1984). Literate Programming intertwines code and documentation, enabling developers to explain their logic and thought processes alongside the source code in a human-readable format.
 
-Key points about signals and movement:
+The core of this project resides in the file `main.org`, which serves as the **original source**. Using tools inspired by the Literate Programming methodology, the following processes are automated:
+1. **Tangling**: Extracting and generating the Go source code (`main.go`) from `main.org`.
+2. **Weaving**: Generating an HTML file to provide a well-formatted, readable documentation.
 
-    Sources can emit recall signals (α) which are finite strings on the alphabet {0, 1}
-    An automaton (η) responds to a signal (α) if and only if α is a prefix of η
-        For example, if η = "1011", it responds to signals "1", "10", "101", "1011"
-    Movement rules:
-        Among responding automata, only those with minimum distance from the source will move
-        These automata must also have a free path of minimum distance available
-        All qualifying automata will move to the source position
+This approach enhances clarity, maintainability, and collaboration by tightly coupling the implementation and its explanation.
 
-Let's break down the movement algorithm:
+## Repository Structure
 
-    When a source at position (x, y) emits signal α:
-        Find all automata {η1, ..., ηk} where α is a prefix of ηi
-        Calculate distance di from each automaton to source
-        Find minimum distance d = min{di | 1 ≤ i ≤ k}
-    Define set A as automata that:
-        Have distance = d from source
-        Have a free path of length d to source
-    Movement:
-        All automata in set A move to source position (x, y)
-        All other automata remain in their current positions
+- **`main.org`**: The primary Literate Programming source file. It contains both the documentation and the embedded Go code.
+- **`main.go`**: Tangled Go code generated from `main.org`. This file contains the executable implementation.
+- **`main.html`**: Weaved HTML documentation generated from `main.org`, providing a user-friendly visualization of the logic and code.
+
+## Key Concepts
+
+1. **Automata**:
+   - Identified by binary strings (e.g., `1011`).
+   - Positioned on a discrete grid with integer coordinates.
+   - Capable of sharing positions with other automata.
+
+2. **Obstacles**:
+   - Defined as rectangular regions with integer boundaries.
+   - Automata cannot occupy or traverse points within obstacles.
+
+3. **Signals**:
+   - Emit binary string signals to attract automata.
+   - Automata respond if the signal is a prefix of their identifier.
+
+4. **Movement Algorithm**:
+   - Automata with minimum distance and free paths move towards the signal source.
+   - Others remain stationary.
+
+---
+
+This project combines algorithmic rigor, discrete mathematics, and the elegance of Literate Programming to investigate automata behavior in complex environments. For more insights, explore the full documentation available in `main.html`.
